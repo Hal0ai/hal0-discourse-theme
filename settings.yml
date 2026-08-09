@@ -1,0 +1,9 @@
+hal0_web_origin:
+  type: string
+  default: "https://hal0.dev"
+  description: "Origin used to build absolute hrefs for the injected hal0 header/footer nav (learn/benchmarks/profiles links point back at hal0.dev)."
+
+show_hal0_chrome:
+  type: bool
+  default: true
+  description: "Master toggle for the injected hal0 header + footer. Turn off to fall back to Discourse's stock chrome (e.g. while debugging a style conflict)."

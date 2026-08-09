@@ -1,0 +1,24 @@
+{{! REFERENCE-ONLY classic (pre-Ember-CLI / pre-Glimmer) connector.
+    Not loaded by this theme — see javascripts/discourse/connectors/ for the
+    active .gjs version. Discourse still supports plain-Handlebars connector
+    templates at javascripts/discourse/connectors/<outlet>/<name>.hbs on
+    current versions, so this is kept as a copy-paste fallback for anyone
+    running an older Discourse where the .gjs connector doesn't compile.
+
+    Unlike the .gjs version this is NOT wired to settings.yml (hal0_web_origin
+    / show_hal0_chrome) or the sync script — links are hard-coded to
+    https://hal0.dev. Update by hand if you ever need to use this instead. }}
+<div class="hal0-chrome hdr sticky hal0-brand-strip">
+  <div class="wrap wide hdr-in hal0-brand-in">
+    <a class="hdr-brand" href="https://hal0.dev" aria-label="hal0 home">
+      {{! Wordmark SVG omitted here for brevity — copy the markup from
+          javascripts/discourse/lib/hal0-wordmark.js if you activate this file. }}
+      <span class="hdr-slug">forum</span>
+    </a>
+    <nav class="hdr-nav" aria-label="hal0.dev">
+      <a href="https://hal0.dev/docs/getting-started/" rel="noopener" title="hal0.dev">learn <span class="ext">↗</span></a>
+      <a href="https://hal0.dev/docs/reference/model-roster-benchmark/" rel="noopener" title="hal0.dev">benchmarks <span class="ext">↗</span></a>
+      <a href="https://hal0.dev/profiles" rel="noopener" title="hal0.dev">profiles <span class="ext">↗</span></a>
+    </nav>
+  </div>
+</div>

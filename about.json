@@ -1,0 +1,35 @@
+{
+  "name": "hal0 forum theme",
+  "component": true,
+  "about_url": "https://github.com/Hal0ai/hal0-discourse-theme",
+  "license_url": "https://github.com/Hal0ai/hal0-discourse-theme/blob/main/LICENSE",
+  "authors": "hal0",
+  "theme_version": "1.0.0",
+  "minimum_discourse_version": "3.2.0",
+  "color_schemes": {
+    "hal0 dark": {
+      "primary": "f5f5f4",
+      "secondary": "0a0a0a",
+      "tertiary": "ffb000",
+      "quaternary": "262626",
+      "header_background": "141414",
+      "header_primary": "f5f5f4",
+      "highlight": "7a5500",
+      "danger": "ef6b6b",
+      "success": "6fcf97",
+      "love": "ffb000"
+    },
+    "hal0 light": {
+      "primary": "1c1917",
+      "secondary": "fafaf9",
+      "tertiary": "b87800",
+      "quaternary": "e7e5e4",
+      "header_background": "ffffff",
+      "header_primary": "1c1917",
+      "highlight": "f7d680",
+      "danger": "cf222e",
+      "success": "1a7f37",
+      "love": "b87800"
+    }
+  }
+}

@@ -1,0 +1,434 @@
+// hal0 forum theme component — common/common.scss
+//
+// Loads the synced brand tokens, then the hand-authored chrome CSS that
+// styles the injected header/footer connectors. Everything the connectors
+// render lives inside a `.hal0-chrome` wrapper so this file can alias the
+// generic variable names used by the hal0-web design comp (--bg, --fg,
+// --line, --jbm, ...) to the --hal0-* tokens WITHOUT touching Discourse's
+// own global custom properties (--primary, --secondary, --tertiary, ...).
+// Discourse's own topic list / post / composer chrome is themed separately,
+// and much more lightly, via the "Discourse variable bridge" section below —
+// see the README's "what is NOT themed here" list.
+
+@import "hal0-tokens";
+
+// ---------------------------------------------------------------------------
+// Discourse variable bridge
+//
+// about.json ships two Discourse color schemes ("hal0 dark" / "hal0 light")
+// built from the same hex values as tokens.css, so Discourse's own
+// --primary / --secondary / --tertiary / --header_background custom
+// properties already carry hal0 colors for anything Discourse themes
+// natively (buttons, links, badges). This block only fills in the couple of
+// Discourse-specific hooks that benefit from a direct --hal0-* reference
+// rather than the coarser primary/secondary/tertiary mapping.
+// ---------------------------------------------------------------------------
+:root {
+  --d-hover: var(--hal0-bg-2);
+  --danger: var(--hal0-err);
+  --success: var(--hal0-ok);
+}
+
+body.hal0-chrome-active {
+  background: var(--hal0-bg);
+}
+
+// ---------------------------------------------------------------------------
+// .hal0-chrome — local alias scope for the injected header/footer markup.
+// Ported from docs/design/2026-08-09-community-comps/hal0-site.css
+// (.hdr / .ftr / .subnav rules + the .wrap / .iconbtn / .searchbtn / .drawer /
+// .avatar primitives those rules depend on) with selectors otherwise
+// unchanged — only the base var *names* are aliased here, not their values.
+// ---------------------------------------------------------------------------
+.hal0-chrome {
+  --bg: var(--hal0-bg);
+  --bg-1: var(--hal0-bg-elevated);
+  --bg-2: var(--hal0-bg-2);
+  --bg-3: var(--hal0-bg-3);
+  --bg-sunken: var(--hal0-bg-sunken);
+  --fg: var(--hal0-fg);
+  --fg-2: var(--hal0-fg-muted);
+  --fg-3: var(--hal0-fg-dim);
+  --fg-4: var(--hal0-fg-faint);
+  --fg-5: var(--hal0-fg-ghost);
+  --line: var(--hal0-border);
+  --line-soft: var(--hal0-border-soft);
+  --line-strong: var(--hal0-border-strong);
+  --accent: var(--hal0-accent);
+  --accent-hover: var(--hal0-accent-hover);
+  --accent-muted: var(--hal0-accent-muted);
+  --accent-soft: var(--hal0-accent-soft);
+  --accent-line: var(--hal0-accent-line);
+  --accent-glow: var(--hal0-accent-glow);
+  --jbm: var(--hal0-font-mono);
+  --geist: var(--hal0-font-body);
+  --rad: var(--hal0-rad);
+  --rad-sm: var(--hal0-rad-sm);
+  --rad-lg: var(--hal0-rad-lg);
+  --rad-pill: var(--hal0-rad-pill);
+  --ls-display: var(--hal0-ls-display);
+  --ls-title: var(--hal0-ls-title);
+  --ls-label: var(--hal0-ls-label);
+  --ls-tight: var(--hal0-ls-tight);
+  --ease: var(--hal0-ease);
+  --dur-fast: var(--hal0-dur-fast);
+  --shadow-menu: var(--hal0-shadow-menu);
+
+  font-family: var(--geist);
+
+  a {
+    color: var(--fg);
+    text-decoration: none;
+  }
+  a:hover {
+    color: var(--accent);
+  }
+  a.btn {
+    color: #0a0a0a;
+  }
+  a.btn:hover {
+    color: #0a0a0a;
+  }
+  a.btn.ghost,
+  a.btn.ghost:hover {
+    color: var(--fg);
+  }
+}
+
+.hal0-chrome .mono {
+  font-family: var(--jbm);
+}
+
+// ── page shell ──────────────────────────────────────────────────────────
+.hal0-chrome .wrap {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+.hal0-chrome .wrap.wide {
+  max-width: 1440px;
+}
+@media (max-width: 640px) {
+  .hal0-chrome .wrap {
+    padding: 0 16px;
+  }
+}
+
+// ── shared primitives (buttons live via Discourse's own .btn already;
+// these are the chrome-specific bits: icon buttons, search pill, drawer,
+// monogram avatar fallback) ───────────────────────────────────────────
+.hal0-chrome .iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--rad-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fg-3);
+  cursor: pointer;
+  position: relative;
+  transition:
+    color var(--dur-fast) var(--ease),
+    background var(--dur-fast) var(--ease),
+    border-color var(--dur-fast) var(--ease);
+}
+.hal0-chrome .iconbtn:hover {
+  color: var(--fg);
+  background: var(--bg-2);
+  border-color: var(--line);
+}
+.hal0-chrome .iconbtn .pip {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+.hal0-chrome .searchbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 30px;
+  padding: 0 8px 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--rad-sm);
+  background: var(--bg-1);
+  color: var(--fg-4);
+  font-family: var(--jbm);
+  font-size: 11.5px;
+  cursor: pointer;
+  min-width: 180px;
+  transition: border-color var(--dur-fast) var(--ease);
+}
+.hal0-chrome .searchbtn:hover {
+  border-color: var(--line-strong);
+  color: var(--fg-3);
+}
+.hal0-chrome .searchbtn .k {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--fg-4);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 1px 4px;
+}
+.hal0-chrome .avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--rad-sm);
+  background: var(--bg-3);
+  color: var(--fg-2);
+  font-family: var(--jbm);
+  font-size: 10px;
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+  overflow: hidden;
+  text-transform: lowercase;
+}
+.hal0-chrome .drawer {
+  position: absolute;
+  inset: 56px 0 auto 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  box-shadow: var(--shadow-menu);
+  padding: 8px 0 20px;
+}
+.hal0-chrome .drawer a.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 24px;
+  font-family: var(--jbm);
+  font-size: 15px;
+  color: var(--fg-2);
+  border-bottom: 1px solid var(--line-soft);
+}
+.hal0-chrome .drawer a.row.on {
+  color: var(--accent);
+  box-shadow: inset 2px 0 0 var(--accent);
+  background: var(--accent-soft);
+}
+.hal0-chrome .drawer .foot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 24px 0;
+}
+
+// ── header — the filament hairline is the signature: a 1px bottom
+// hairline that brightens to sodium amber at the centre. ────────────────
+.hal0-chrome .hdr {
+  position: relative;
+  z-index: 40;
+  background: rgba(10, 10, 10, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+html.light-scheme .hal0-chrome .hdr {
+  background: rgba(250, 250, 249, 0.85);
+}
+.hal0-chrome .hdr::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--line) 18%,
+    color-mix(in srgb, var(--accent) 70%, var(--line)) 50%,
+    var(--line) 82%,
+    transparent 100%
+  );
+  box-shadow: 0 1px 14px rgba(255, 176, 0, 0.09);
+}
+.hal0-chrome .hdr.sticky {
+  position: sticky;
+  top: 0;
+}
+.hal0-chrome .hdr-in {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  height: 56px;
+}
+.hal0-chrome .hdr-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  color: var(--fg);
+}
+.hal0-chrome .hdr-brand svg {
+  display: block;
+  height: 19px;
+  width: auto;
+}
+.hal0-chrome .hdr-slug {
+  font-family: var(--jbm);
+  font-size: 12px;
+  color: var(--fg-3);
+  letter-spacing: var(--ls-tight);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-transform: lowercase;
+}
+.hal0-chrome .hdr-slug::before {
+  content: "";
+  width: 1px;
+  height: 16px;
+  background: var(--line-strong);
+}
+.hal0-chrome .hdr-nav {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+.hal0-chrome .hdr-nav a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 56px;
+  padding: 0 11px;
+  font-family: var(--jbm);
+  font-size: 12.5px;
+  letter-spacing: var(--ls-tight);
+  color: var(--fg-3);
+  text-transform: lowercase;
+  transition: color var(--dur-fast) var(--ease);
+}
+.hal0-chrome .hdr-nav a:hover {
+  color: var(--fg);
+}
+.hal0-chrome .hdr-nav a.on {
+  color: var(--accent);
+}
+.hal0-chrome .hdr-nav a.on::after {
+  content: "";
+  position: absolute;
+  left: 11px;
+  right: 11px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.hal0-chrome .hdr-nav a .ext {
+  opacity: 0.5;
+  font-size: 10px;
+}
+.hal0-chrome .hdr-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.hal0-chrome .hdr-sep {
+  width: 1px;
+  height: 20px;
+  background: var(--line);
+  margin: 0 4px;
+}
+.hal0-chrome .hdr-burger {
+  display: none;
+}
+@media (max-width: 1000px) {
+  .hal0-chrome .hdr-nav,
+  .hal0-chrome .hdr-right .desk {
+    display: none;
+  }
+  .hal0-chrome .hdr-burger {
+    display: inline-flex;
+  }
+}
+
+// ── footer ────────────────────────────────────────────────────────────
+.hal0-chrome .ftr {
+  border-top: 1px solid var(--line);
+  background: var(--bg-sunken);
+  margin-top: 0; // below-footer outlet already sits after Discourse's footer
+}
+.hal0-chrome .ftr-cols {
+  display: grid;
+  grid-template-columns: 1.4fr repeat(3, minmax(0, 1fr));
+  gap: 40px;
+  padding: 48px 0 40px;
+}
+.hal0-chrome .ftr-brand svg {
+  display: block;
+  height: 20px;
+  width: auto;
+}
+.hal0-chrome .ftr-brand p {
+  max-width: 34ch;
+}
+.hal0-chrome .ftr-col h4 {
+  margin: 0 0 14px;
+  font-family: var(--jbm);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: var(--ls-label);
+  color: var(--fg-3);
+}
+.hal0-chrome .ftr-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.hal0-chrome .ftr-col a {
+  font-size: 13px;
+  color: var(--fg-3);
+}
+.hal0-chrome .ftr-col a:hover {
+  color: var(--accent);
+}
+.hal0-chrome .ftr-base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 0 28px;
+  border-top: 1px solid var(--line-soft);
+  font-family: var(--jbm);
+  font-size: 11px;
+  color: var(--fg-4);
+  flex-wrap: wrap;
+}
+.hal0-chrome .ftr-base a {
+  color: var(--fg-4);
+}
+@media (max-width: 820px) {
+  .hal0-chrome .ftr-cols {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+}
+
+// ── status dot (footer "all systems steady") ────────────────────────────
+.hal0-chrome .dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.hal0-chrome .dot.ready {
+  background: var(--hal0-ok);
+  box-shadow: 0 0 8px var(--hal0-ok-line, rgba(111, 207, 151, 0.3));
+}
