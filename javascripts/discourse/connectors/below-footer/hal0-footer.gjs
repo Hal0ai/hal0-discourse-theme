@@ -4,6 +4,14 @@ import { HAL0_FOOTER_COLUMNS, HAL0_SOCIAL, HAL0_FOOTER_BASE } from "../../lib/ha
 import { HAL0_WORDMARK_SVG } from "../../lib/hal0-wordmark";
 import { HAL0_ICON_PATHS } from "../../lib/hal0-icons";
 
+// Hand-maintained — mirrors SiteFooter.astro's `footerVersion`, which comes
+// from parseChangelog() over hal0-web/src/data/changelog.md's latest
+// `## [x.y.z]` header (currently "1.0.0-rc.3"). The sync script doesn't
+// parse changelog.md yet, so this has to be bumped by hand when hal0-web's
+// changelog gains a new latest version — check it against changelog.md at
+// launch time and whenever this theme is updated afterward.
+const FOOTER_VERSION = "1.0.0-rc.3";
+
 /**
  * hal0-footer — the shared brand footer, identical to every other hal0.dev
  * surface (see SiteFooter.astro). Injected via `below-footer` so it sits
@@ -15,9 +23,14 @@ export default class Hal0Footer extends Component {
   columns = HAL0_FOOTER_COLUMNS;
   social = HAL0_SOCIAL;
   footerBase = HAL0_FOOTER_BASE;
+  footerVersion = FOOTER_VERSION;
 
   get rssLink() {
     return this.footerBase.find((l) => l.label === "rss");
+  }
+
+  get changelogLink() {
+    return this.footerBase.find((l) => l.label === "changelog");
   }
 
   get origin() {
@@ -34,6 +47,12 @@ export default class Hal0Footer extends Component {
   iconSvg(id) {
     const path = HAL0_ICON_PATHS[id];
     if (!path) {
+      // Silently rendering nothing here would hide a real problem: it means
+      // nav.json's `social` (or the rss entry) grew an id this repo's
+      // hand-copied hal0-icons.js doesn't know about yet. Warn so whoever
+      // runs the sync script next notices instead of shipping a blank icon.
+      // eslint-disable-next-line no-console
+      console.warn(`[hal0-theme] no icon glyph for id "${id}" — add it to hal0-icons.js`);
       return htmlSafe("");
     }
     return htmlSafe(
@@ -86,9 +105,11 @@ export default class Hal0Footer extends Component {
             {{/each}}
           </div>
           <div class="ftr-base">
-            <span>Apache-2.0 · hal0 v0.5.0a1 · 1.0.0-RC.3</span>
-            <span style="display: inline-flex; align-items: center; gap: 8px;">
-              <span class="dot ready"></span> all systems steady
+            <span>Apache-2.0 · {{this.footerVersion}}</span>
+            <span>
+              {{#if this.changelogLink}}
+                <a href={{this.hrefFor this.changelogLink}}>{{this.changelogLink.label}}</a>
+              {{/if}}
             </span>
           </div>
         </div>

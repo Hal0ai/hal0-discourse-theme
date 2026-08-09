@@ -419,16 +419,3 @@ html.light-scheme .hal0-chrome .hdr {
     gap: 32px;
   }
 }
-
-// ── status dot (footer "all systems steady") ────────────────────────────
-.hal0-chrome .dot {
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-.hal0-chrome .dot.ready {
-  background: var(--hal0-ok);
-  box-shadow: 0 0 8px var(--hal0-ok-line, rgba(111, 207, 151, 0.3));
-}

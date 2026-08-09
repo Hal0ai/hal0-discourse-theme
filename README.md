@@ -150,18 +150,30 @@ and commit the diff whenever hal0-web's tokens or nav change.
 
 - `about.json`'s `color_schemes` — Discourse's own scheme format
   (`primary`/`secondary`/`tertiary`/...) doesn't map 1:1 onto `--hal0-*`
-  token names, so those hex values are hand-transcribed from
-  `tokens.css`. If hal0's palette changes, update `about.json` too.
+  token names, so those hex values are hand-transcribed from `tokens.css`,
+  **except** the light scheme's `danger`/`success` (`cf222e`/`1a7f37`).
+  `tokens.css` doesn't carry light-mode `--err`/`--ok` overrides yet — those
+  two values come from the design handoff doc instead
+  (`hal0-web/docs/design/2026-08-09-community-comps/README.md`, "Colour —
+  light overrides": `--ok #1a7f37 · --err #cf222e`, required for AA contrast
+  on white). This is tracked on the hal0-web side; once tokens.css gains
+  light `--err`/`--ok`, the sync script can be extended to cover them too.
+  If hal0's palette changes elsewhere, update `about.json` by hand.
 - `javascripts/discourse/lib/hal0-wordmark.js` and `hal0-icons.js` — the
   wordmark and github/discord/rss glyphs, copied once from
   `public/brand/logo-halo-dark.svg` and `site-chrome.jsx`'s `BrandIcon`.
   These change rarely enough that a sync step wasn't worth building.
-- The footer base line's version string
-  (`Apache-2.0 · hal0 v0.5.0a1 · 1.0.0-RC.3`, hardcoded in
-  `hal0-footer.gjs`) — per the design brief this must match `BINARY` in
-  `hal0-web/src/data/model-roster.ts` and the homepage hero pill. There's no
-  automated source for it in this repo yet; update it by hand when hal0 cuts
-  a release, or wire a future sync step to `model-roster.ts` if it drifts
+- The footer base line's version string (`FOOTER_VERSION` in
+  `hal0-footer.gjs`, currently `"1.0.0-rc.3"`) — mirrors
+  `SiteFooter.astro`'s `footerVersion`, which comes from `parseChangelog()`
+  over `hal0-web/src/data/changelog.md`'s latest `## [x.y.z]` entry. It is
+  **not** `BINARY` from `model-roster.ts` or the homepage hero pill — those
+  are a different version axis (the hal0 binary release, not the docs-site
+  changelog the real footer actually reads). There's no automated source for
+  changelog.md parsing in this repo yet; bump `FOOTER_VERSION` (and the
+  matching hardcoded line in `connectors-classic/below-footer/hal0-footer.hbs`)
+  by hand whenever hal0-web's changelog gains a new latest entry, or wire a
+  future sync step to `changelog.js`'s `parseChangelog()` if that drifts
   often enough to be annoying.
 
 ## Validation (deferred to launch)
@@ -192,8 +204,8 @@ running forum. Before calling this done:
       [How the header actually attaches](#how-the-header-actually-attaches))
       is acceptable, or whether full header replacement is required — and if
       so, scope that as separate follow-up work.
-- [ ] Verify the footer's hardcoded version string against the live
-      `BINARY` value at launch time.
+- [ ] Verify the footer's hardcoded `FOOTER_VERSION` against
+      `hal0-web/src/data/changelog.md`'s actual latest entry at launch time.
 - [ ] Check the `⌘K` / `/` search keyboard shortcut and Discourse's own
       search still work unobstructed with the extra strip in the DOM.
 - [ ] Mobile: confirm the brand strip's nav links don't create a confusing
