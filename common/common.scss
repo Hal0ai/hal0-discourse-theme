@@ -224,17 +224,19 @@ body.hal0-chrome-active {
 
 // ── header — the filament hairline is the signature: a 1px bottom
 // hairline that brightens to sodium amber at the centre. ────────────────
-.hal0-chrome .hdr {
+.hal0-chrome.hdr {
   position: relative;
   z-index: 40;
   background: rgba(10, 10, 10, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
 }
-html.light-scheme .hal0-chrome .hdr {
-  background: rgba(250, 250, 249, 0.85);
+@media (prefers-color-scheme: light) {
+  .hal0-chrome.hdr {
+    background: rgba(250, 250, 249, 0.85);
+  }
 }
-.hal0-chrome .hdr::after {
+.hal0-chrome.hdr::after {
   content: "";
   position: absolute;
   left: 0;
@@ -251,7 +253,7 @@ html.light-scheme .hal0-chrome .hdr {
   );
   box-shadow: 0 1px 14px rgba(255, 176, 0, 0.09);
 }
-.hal0-chrome .hdr.sticky {
+.hal0-chrome.hdr.sticky {
   position: sticky;
   top: 0;
 }
@@ -356,7 +358,7 @@ html.light-scheme .hal0-chrome .hdr {
 }
 
 // ── footer ────────────────────────────────────────────────────────────
-.hal0-chrome .ftr {
+.hal0-chrome.ftr {
   border-top: 1px solid var(--line);
   background: var(--bg-sunken);
   margin-top: 0; // below-footer outlet already sits after Discourse's footer
