@@ -226,17 +226,22 @@
 
 // Posters overlap by 6px, each cut out of the row surface by a 1px border
 // in the list's own background colour.
-.topic-list .posters {
-  display: flex;
-  justify-content: flex-end;
+// NB: do not put `display: flex` on the cell. `.posters` matches the <td>
+// itself, and taking a table cell out of table layout drops its borders --
+// it punches a visible gap through both the header rule and every row
+// divider. Align with text-align and overlap the anchors instead.
+.topic-list td.posters {
+  text-align: right;
+  white-space: nowrap;
 }
-.topic-list .posters > a {
+.topic-list td.posters > a {
+  display: inline-block;
   margin-left: -6px;
 }
-.topic-list .posters > a:first-child {
+.topic-list td.posters > a:first-child {
   margin-left: 0;
 }
-.topic-list .posters img.avatar {
+.topic-list td.posters img.avatar {
   border-radius: var(--hal0-rad-sm);
   border: 1px solid var(--hal0-bg-elevated);
   background: var(--hal0-bg-3);
