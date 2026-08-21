@@ -6,7 +6,7 @@
  * hal0-web, so brand tokens and nav links are never hand-forked here.
  *
  * Source of truth (in hal0-web):
- *   - src/styles/tokens.css   -> scss/_hal0-tokens.scss
+ *   - src/styles/tokens.css   -> stylesheets/_hal0-tokens.scss
  *   - src/data/nav.json       -> javascripts/discourse/lib/hal0-nav-data.js
  *
  * Usage:
@@ -39,7 +39,7 @@ for (const [label, p] of [["tokens.css", tokensPath], ["nav.json", navPath]]) {
 }
 
 // ---------------------------------------------------------------------------
-// 1. tokens.css -> scss/_hal0-tokens.scss
+// 1. tokens.css -> stylesheets/_hal0-tokens.scss
 // ---------------------------------------------------------------------------
 
 function extractDeclBlock(css, selectorRe) {
@@ -116,9 +116,9 @@ ${renderDecls(lightDecls)}
 }
 `;
 
-mkdirSync(resolve(repoRoot, "scss"), { recursive: true });
-writeFileSync(resolve(repoRoot, "scss/_hal0-tokens.scss"), tokensScss);
-console.log(`wrote scss/_hal0-tokens.scss (${darkDecls.length} dark tokens, ${lightDecls.length} light overrides)`);
+mkdirSync(resolve(repoRoot, "stylesheets"), { recursive: true });
+writeFileSync(resolve(repoRoot, "stylesheets/_hal0-tokens.scss"), tokensScss);
+console.log(`wrote stylesheets/_hal0-tokens.scss (${darkDecls.length} dark tokens, ${lightDecls.length} light overrides)`);
 
 // ---------------------------------------------------------------------------
 // 2. nav.json -> javascripts/discourse/lib/hal0-nav-data.js
