@@ -2,10 +2,10 @@
 
 A Discourse **theme component** (not a full theme — installs alongside
 whatever base theme `forum.hal0.dev` runs) that carries the hal0 brand into
-Discourse: dark/light color schemes built from hal0's design tokens, and two
-injected chrome pieces (a brand/nav strip above the topic list, a shared
-footer below Discourse's own footer) so the forum reads as part of hal0.dev
-rather than a bolted-on subdomain.
+Discourse: dark/light color schemes built from hal0's design tokens, and
+chrome injected into Discourse's own header and footer — the wordmark, the
+hal0 nav, a sub-nav, and the shared site footer — so the forum reads as part
+of hal0.dev rather than a bolted-on subdomain.
 
 Design source: `hal0-web/docs/design/2026-08-09-community-comps/`
 (`README.md` "The unified chrome" + screen 7 "Forum", `07 Forum.html`,
@@ -20,21 +20,22 @@ settings.yml                                  hal0_web_origin, show_hal0_chrome
 common/
   common.scss                                 entry point: token import, Discourse var bridge,
                                                .hal0-chrome scoped CSS (ported from hal0-site.css)
-scss/
+stylesheets/
   _hal0-tokens.scss                           AUTO-GENERATED — brand tokens as CSS custom properties.
                                                Must live here, not in common/: Discourse compiles
-                                               common/common.scss as an entrypoint and only resolves
-                                               @import partials out of scss/.
+                                               common/common.scss as an entrypoint and resolves
+                                               @import partials out of stylesheets/.
 javascripts/discourse/
   connectors/
-    above-main-container/hal0-header.gjs      brand + nav strip (active connector)
-    below-footer/hal0-footer.gjs              shared footer (active connector)
+    home-logo-contents/hal0-wordmark.gjs      inline wordmark, replacing the uploaded logo
+    before-header-panel/hal0-nav.gjs          "forum" slug + hal0 nav, inline in Discourse's header
+    after-header/hal0-subnav.gjs              the comp's second bar (latest · top · categories · …)
+    below-footer/hal0-footer.gjs              shared footer
   lib/
     hal0-nav-data.js                          AUTO-GENERATED — nav links from nav.json
     hal0-wordmark.js                          inline hal0 wordmark SVG (hand-copied, rarely changes)
     hal0-icons.js                             github/discord/rss glyph paths (hand-copied)
-connectors-classic/                           reference-only classic Handlebars connectors (NOT loaded)
-  above-main-container/hal0-header.hbs
+connectors-classic/                           reference-only classic Handlebars connector (NOT loaded)
   below-footer/hal0-footer.hbs
 scripts/
   sync-from-hal0-web.mjs                      regenerates the two AUTO-GENERATED files above
@@ -93,30 +94,38 @@ Two theme settings (Customize → Themes → hal0 forum theme → Settings):
 
 ## How the header actually attaches
 
-Read this before comparing against `07 Forum.html` pixel-for-pixel: the
-`above-main-container` plugin outlet renders **below** Discourse's own fixed
-`.d-header`, not above it — there's no outlet above the native header itself.
-So `hal0-header.gjs` does **not** replace or hide Discourse's header. Search,
-notifications, the hamburger menu, and the user menu all stay **100% native
-Discourse**, exactly as the design brief's "unified chrome" section requires
-("composer/notifications/moderation/search/user cards stay native").
+There is **one** header: Discourse's own `.d-header`, restyled, with hal0
+content injected into it. Two bars total, matching `07 Forum.html`, which
+renders `<Header variant="forum" sticky />` followed by a `subnav`.
 
-What this theme actually injects is a second, slimmer strip directly beneath
-Discourse's native header: the hal0 wordmark, a `forum` host slug, and the
-hal0.dev top nav (`learn` / `benchmarks` / `profiles`, each carrying the `↗`
-cross-host marker). That strip carries the signature amber filament hairline
-and reuses the same `.hdr` CSS as hal0.dev's own header. Discourse's native
-header above it is restyled only via the color scheme (`about.json`) and the
-small variable bridge in `common.scss` — it is not touched structurally.
+| Outlet | What goes in it |
+|---|---|
+| `home-logo-contents` | the inline wordmark (the uploaded `logo` is a 1500×1500 square artboard and cannot be cropped as an `<img>`) |
+| `before-header-panel` | the `forum` slug and the hal0 nav — this outlet sits in `header/contents.gjs` between the home logo and the panel carrying search / notifications / the user menu, which is the comp's forum-variant order exactly |
+| `after-header` | the sub-nav (`latest · top · categories · my posts · hal0.dev ↗`). It renders *inside* `<header>`, so the bar travels with the sticky header rather than creating a second sticky context |
+| `below-footer` | the shared footer |
 
-If pixel-parity with the comp's single fused header (search/notifications/
-avatar rendered inside the hal0-styled bar) turns out to be a hard
-requirement after launch, that needs a different technique — most likely
-CSS-hiding `.d-header`'s content and reimplementing its interactive pieces
-inside the connector, wiring them to Discourse's `header` service / app
-events. That's flagged as **open work**, not attempted here, because it
-can't be built safely without a live Discourse instance to test against (see
-[Validation](#validation-deferred-to-launch)).
+Discourse's search, notifications, hamburger and user menu are **100%
+native** and structurally untouched, exactly as the design brief requires
+("composer/notifications/moderation/search/user cards stay native"). They
+are restyled only through the colour scheme and the variable bridge in
+`common.scss`.
+
+Two core rules have to be overridden for this to lay out correctly, and both
+are load-bearing:
+
+- `.d-header` is pinned to `3.66em`/`4em`. It needs `height: auto`, or the
+  56px header row and the sub-nav overflow it — and because Discourse
+  measures that element to publish `--header-offset`, the overflow is drawn
+  on top of the page content.
+- `.d-header` is a column flex container that does not stretch its children,
+  so the sub-nav needs an explicit `width: 100%` or it shrink-wraps to its
+  tabs and floats in the middle of the page.
+
+An earlier version injected a whole second brand strip into
+`above-main-container`. That outlet renders *below* the native header, so the
+result was two stacked bars, the wordmark drawn twice, and a mostly empty
+56px band. Everything it carried now lives in the real header.
 
 ## What is intentionally NOT themed here
 
@@ -131,8 +140,8 @@ markup:
 - Discourse's own search (full-page search and the header search dropdown)
 - Discourse's native header itself (see above) — only restyled, not replaced
 
-Only the brand strip and footer are bespoke markup. Everything else stays
-Discourse, colored to match.
+Only the injected nav, sub-nav, wordmark and footer are bespoke markup.
+Everything else stays Discourse, coloured to match.
 
 ## Connector format: .gjs (Glimmer), not classic Handlebars
 
@@ -160,7 +169,7 @@ checkout so tokens and nav links are never hand-typed twice:
 
 | Generated file | Source |
 |---|---|
-| `scss/_hal0-tokens.scss` | `src/styles/tokens.css` (`:root` + `[data-theme='light']` blocks) |
+| `stylesheets/_hal0-tokens.scss` | `src/styles/tokens.css` (`:root` + `[data-theme='light']` blocks) |
 | `javascripts/discourse/lib/hal0-nav-data.js` | `src/data/nav.json` (`header`, `footerColumns`, `social`, `footerBase`) |
 
 ```bash
