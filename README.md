@@ -20,7 +20,11 @@ settings.yml                                  hal0_web_origin, show_hal0_chrome
 common/
   common.scss                                 entry point: token import, Discourse var bridge,
                                                .hal0-chrome scoped CSS (ported from hal0-site.css)
-  _hal0-tokens.scss                           AUTO-GENERATED — brand tokens as CSS custom properties
+scss/
+  _hal0-tokens.scss                           AUTO-GENERATED — brand tokens as CSS custom properties.
+                                               Must live here, not in common/: Discourse compiles
+                                               common/common.scss as an entrypoint and only resolves
+                                               @import partials out of scss/.
 javascripts/discourse/
   connectors/
     above-main-container/hal0-header.gjs      brand + nav strip (active connector)
@@ -128,7 +132,7 @@ checkout so tokens and nav links are never hand-typed twice:
 
 | Generated file | Source |
 |---|---|
-| `common/_hal0-tokens.scss` | `src/styles/tokens.css` (`:root` + `[data-theme='light']` blocks) |
+| `scss/_hal0-tokens.scss` | `src/styles/tokens.css` (`:root` + `[data-theme='light']` blocks) |
 | `javascripts/discourse/lib/hal0-nav-data.js` | `src/data/nav.json` (`header`, `footerColumns`, `social`, `footerBase`) |
 
 ```bash

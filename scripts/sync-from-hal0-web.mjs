@@ -6,7 +6,7 @@
  * hal0-web, so brand tokens and nav links are never hand-forked here.
  *
  * Source of truth (in hal0-web):
- *   - src/styles/tokens.css   -> common/_hal0-tokens.scss
+ *   - src/styles/tokens.css   -> scss/_hal0-tokens.scss
  *   - src/data/nav.json       -> javascripts/discourse/lib/hal0-nav-data.js
  *
  * Usage:
@@ -16,7 +16,7 @@
  * Resolution order for the hal0-web checkout path: CLI arg > HAL0_WEB_DIR
  * env var > ../hal0-web relative to this repo (sibling checkout).
  */
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -39,7 +39,7 @@ for (const [label, p] of [["tokens.css", tokensPath], ["nav.json", navPath]]) {
 }
 
 // ---------------------------------------------------------------------------
-// 1. tokens.css -> common/_hal0-tokens.scss
+// 1. tokens.css -> scss/_hal0-tokens.scss
 // ---------------------------------------------------------------------------
 
 function extractDeclBlock(css, selectorRe) {
@@ -101,8 +101,9 @@ ${renderDecls(lightDecls)}
 }
 `;
 
-writeFileSync(resolve(repoRoot, "common/_hal0-tokens.scss"), tokensScss);
-console.log(`wrote common/_hal0-tokens.scss (${darkDecls.length} dark tokens, ${lightDecls.length} light overrides)`);
+mkdirSync(resolve(repoRoot, "scss"), { recursive: true });
+writeFileSync(resolve(repoRoot, "scss/_hal0-tokens.scss"), tokensScss);
+console.log(`wrote scss/_hal0-tokens.scss (${darkDecls.length} dark tokens, ${lightDecls.length} light overrides)`);
 
 // ---------------------------------------------------------------------------
 // 2. nav.json -> javascripts/discourse/lib/hal0-nav-data.js
