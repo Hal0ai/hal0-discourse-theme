@@ -1,0 +1,377 @@
+// hal0 → Discourse surface restyle.
+//
+// This file is the "restyled through Discourse's own components" half of the
+// design brief's split of responsibility. It changes no markup: every
+// selector below targets a class Discourse already renders. The bespoke
+// chrome (nav, sub-nav, wordmark, footer) lives in common/common.scss.
+//
+// Source of truth is the comp pack:
+//   hal0-web/docs/design/2026-08-09-community-comps/
+//     07 Forum.html      — .tlist / .trow / .tmeta / .post.answer / .role
+//     hal0-site.css      — .fpill, .well, .dtable, .avatar
+//     _ds/…/components.css — .chip, .dot
+//
+// Comp class            → Discourse class
+//   .tlist              → .topic-list
+//   .tlist-h            → .topic-list-header th
+//   .trow               → tr.topic-list-item
+//   .ttitle             → .link-top-line .title
+//   .tmeta              → .link-bottom-line
+//   .cat                → .badge-category__wrapper / .badge-category
+//   .tag                → .discourse-tag
+//   .posters .avatar    → td.posters .avatar
+//   .tnum               → td.num
+//   .tnum .new          → .badge-notification.unread-posts
+//   .post.answer        → .topic-post.accepted-answer
+//   .role               → .poster-icon / .user-title
+//
+// Generic token names (--bg, --fg, --line) are aliased only inside
+// .hal0-chrome, so everything here uses the --hal0-* names directly.
+
+// ─── shared primitives ──────────────────────────────────────────────────
+// Ported verbatim from the comp so anything this theme or a future
+// connector renders has them available, and so Discourse components that
+// map onto them (below) can @extend rather than restate the values.
+
+.hal0-chrome .chip,
+.d-header .chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 18px;
+  padding: 0 7px;
+  border: 1px solid var(--hal0-border);
+  border-radius: 3px;
+  background: var(--hal0-bg-2);
+  color: var(--hal0-fg-dim);
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  text-transform: lowercase;
+  white-space: nowrap;
+
+  &.amber { background: var(--hal0-accent-soft); color: var(--hal0-accent); border-color: var(--hal0-accent-line); }
+  &.ok    { background: var(--hal0-ok-soft);     color: var(--hal0-ok);     border-color: var(--hal0-ok-line); }
+  &.warn  { background: var(--hal0-warn-soft);   color: var(--hal0-warn);   border-color: var(--hal0-warn-line); }
+  &.err   { background: var(--hal0-err-soft);    color: var(--hal0-err);    border-color: var(--hal0-err-line); }
+  &.info  { background: var(--hal0-info-soft);   color: var(--hal0-info);   border-color: var(--hal0-info-line); }
+
+  &.dev-rocm   { color: var(--hal0-dev-rocm);   border-color: rgba(215, 107, 107, 0.3); background: rgba(215, 107, 107, 0.08); }
+  &.dev-vulkan { color: var(--hal0-dev-vulkan); border-color: rgba(127, 184, 255, 0.3); background: rgba(127, 184, 255, 0.08); }
+  &.dev-npu    { color: var(--hal0-dev-npu);    border-color: rgba(200, 150, 255, 0.3); background: rgba(200, 150, 255, 0.08); }
+  &.dev-cpu    { color: var(--hal0-dev-cpu);    border-color: var(--hal0-border-strong); background: var(--hal0-bg-2); }
+}
+
+// Status dot. The glow is what makes it read as an LED rather than a
+// shadowed circle — keep it.
+.hal0-chrome .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+  background: var(--hal0-fg-faint);
+
+  &.ready   { background: var(--hal0-ok);   box-shadow: 0 0 8px var(--hal0-ok); }
+  &.serving { background: var(--hal0-ok);   box-shadow: 0 0 8px var(--hal0-ok); animation: hal0-pulse 1.2s ease-in-out infinite; }
+  &.warming { background: var(--hal0-warn); box-shadow: 0 0 8px var(--hal0-warn); animation: hal0-pulse 1.2s ease-in-out infinite; }
+  &.error   { background: var(--hal0-err); }
+  &.offline { background: var(--hal0-fg-faint); }
+}
+
+// The comp's only looping animation, reserved for live state dots.
+@keyframes hal0-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+// Terminal well — sunken surface, mono, for anything showing a command or
+// a config blob. Discourse's own code blocks map onto it.
+.hal0-chrome .well,
+.topic-body pre,
+.cooked pre {
+  background: var(--hal0-bg-sunken);
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad);
+  font-family: var(--hal0-font-mono);
+  font-size: 12.5px;
+  line-height: 1.7;
+}
+
+// ─── topic list ─────────────────────────────────────────────────────────
+// The comp frames the list as a card: 1px border, large radius, elevated
+// surface, clipped corners. Discourse renders a bare <table>, so the frame
+// goes on the table and the corner clipping has to be done per-cell —
+// border-radius does not clip table children.
+
+.topic-list {
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad-lg);
+  background: var(--hal0-bg-elevated);
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+
+.topic-list-header th.topic-list-data,
+.topic-list-header th,
+.topic-list-header .topic-list-data {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--hal0-ls-label);
+  color: var(--hal0-fg-dim);
+  border-bottom: 1px solid var(--hal0-border);
+  padding: 9px 16px;
+  background: none;
+
+  // Core sizes these in em off an inherited scale, which lands around
+  // 12.2px; the comp's column headers are a flat 10px.
+  button,
+  .d-button-label,
+  span {
+    font-size: 10px;
+    font-family: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+  }
+}
+.topic-list-header th.num,
+.topic-list-header th.posters {
+  text-align: right;
+}
+// Sorted column reads amber, per the .dtable spec.
+.topic-list-header th.sorting .d-icon,
+.topic-list-header th[aria-sort] button {
+  color: var(--hal0-accent);
+}
+
+.topic-list-item {
+  background: none;
+
+  > td {
+    border-bottom: 1px solid var(--hal0-border-soft);
+    padding: 12px 16px;
+  }
+  &:last-child > td {
+    border-bottom: 0;
+  }
+  &:hover > td {
+    background: var(--hal0-bg-2);
+  }
+}
+
+// Title: 14.5px, tight leading, muted until hovered. Unread topics come
+// forward to full --fg rather than getting a different weight.
+.topic-list-item .link-top-line .title {
+  font-size: 14.5px;
+  line-height: 1.35;
+  color: var(--hal0-fg-muted);
+}
+.topic-list-item:hover .link-top-line .title {
+  color: var(--hal0-accent);
+}
+.topic-list-item.visited .link-top-line .title {
+  color: var(--hal0-fg-dim);
+}
+.topic-list-item .link-top-line .title.top-line-visited,
+.topic-list-item:not(.visited) .link-top-line .title {
+  color: var(--hal0-fg);
+}
+
+.topic-list-item .link-bottom-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 7px;
+}
+
+// Category: an 8px rounded square in the category colour, then the name in
+// mono. Discourse's badge already carries the colour as a border-left or a
+// background depending on the style setting, so the square is rebuilt here
+// from the same custom property it publishes.
+.badge-category__wrapper .badge-category {
+  font-family: var(--hal0-font-mono);
+  font-size: 10.5px;
+  color: var(--hal0-fg-dim);
+  padding: 0;
+  background: none;
+  border: 0;
+}
+.badge-category__wrapper:hover .badge-category {
+  color: var(--hal0-accent);
+}
+.badge-category .badge-category__icon {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+// Tags: outlined mono pills, quieter than the category.
+.discourse-tag,
+.discourse-tags .discourse-tag {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  color: var(--hal0-fg-faint);
+  border: 1px solid var(--hal0-border);
+  border-radius: 3px;
+  padding: 1px 6px;
+  background: none;
+}
+.discourse-tag:hover {
+  color: var(--hal0-accent);
+  border-color: var(--hal0-accent-line);
+}
+
+// Status markers (pinned, solved) sit inline with the title in mono.
+.topic-list-item .topic-statuses .topic-status {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  color: var(--hal0-fg-faint);
+}
+.topic-list-item .topic-statuses .topic-status.--solved,
+.topic-list-item .topic-statuses .d-icon-check {
+  color: var(--hal0-ok);
+}
+
+// Posters overlap by 6px, each cut out of the row surface by a 1px border
+// in the list's own background colour.
+// NB: do not put `display: flex` on the cell. `.posters` matches the <td>
+// itself, and taking a table cell out of table layout drops its borders --
+// it punches a visible gap through both the header rule and every row
+// divider. Align with text-align and overlap the anchors instead.
+.topic-list td.posters {
+  text-align: right;
+  white-space: nowrap;
+}
+.topic-list td.posters > a {
+  display: inline-block;
+  margin-left: -6px;
+}
+.topic-list td.posters > a:first-child {
+  margin-left: 0;
+}
+.topic-list td.posters img.avatar {
+  border-radius: var(--hal0-rad-sm);
+  border: 1px solid var(--hal0-bg-elevated);
+  background: var(--hal0-bg-3);
+}
+
+// Numeric columns: mono, tabular, right-aligned, slashed zero.
+.topic-list td.num,
+.topic-list td.num a,
+.topic-list td.num .number,
+.topic-list td.activity .relative-date {
+  font-family: var(--hal0-font-mono);
+  font-size: 12.5px;
+  color: var(--hal0-fg-dim);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+.topic-list td.activity .relative-date {
+  font-size: 11px;
+  color: var(--hal0-fg-faint);
+}
+
+// Unread count is the one amber pill in the row.
+.topic-list .badge-notification.unread-posts,
+.topic-list .badge-notification.new-topic {
+  background: var(--hal0-accent);
+  color: #0a0a0a;
+  border-radius: var(--hal0-rad-pill);
+  font-family: var(--hal0-font-mono);
+  font-size: 10.5px;
+  min-width: 20px;
+  height: 18px;
+  padding: 0 5px;
+}
+
+// ─── navigation pills ───────────────────────────────────────────────────
+// Discourse's latest/new/unread/top controls map onto the comp's .fpill:
+// true pill, mono, amber-soft fill when active.
+.nav-pills > li > a,
+.list-controls .nav-pills > li > a,
+.list-controls .nav-pills > li > a.active {
+  box-sizing: border-box;
+  height: 26px;
+  min-height: 26px;
+  line-height: 1;
+  padding: 0 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad-pill);
+  background: var(--hal0-bg-elevated);
+  color: var(--hal0-fg-dim);
+  font-family: var(--hal0-font-mono);
+  font-size: 11.5px;
+  transition: all var(--hal0-dur-fast) var(--hal0-ease);
+}
+.nav-pills > li > a:hover {
+  border-color: var(--hal0-border-strong);
+  color: var(--hal0-fg);
+  background: var(--hal0-bg-elevated);
+}
+.nav-pills > li > a.active,
+.nav-pills > li.active > a {
+  background: var(--hal0-accent-soft);
+  border-color: var(--hal0-accent-line);
+  color: var(--hal0-accent);
+}
+
+// ─── categories index ───────────────────────────────────────────────────
+// The comp gives each category row a 4px colour rail. Discourse publishes
+// the category colour on the row, so the rail is drawn from it.
+.category-list .category h3 a,
+.category-list-item .category-name {
+  font-family: var(--hal0-font-mono);
+  letter-spacing: var(--hal0-ls-tight);
+}
+.category-list-item .category-description,
+.category-list td.category .category-description {
+  color: var(--hal0-fg-dim);
+}
+
+// ─── topic view ─────────────────────────────────────────────────────────
+// Accepted answer: green inset rail plus a wash that fades out across the
+// post. Derived from Discourse's own solved state, so an unsolved topic
+// simply never gets it.
+.topic-post.accepted-answer .topic-body,
+.topic-post .accepted-answer {
+  background: linear-gradient(90deg, var(--hal0-ok-soft), transparent 60%);
+  box-shadow: inset 2px 0 0 var(--hal0-ok);
+  border-radius: 0 var(--hal0-rad) var(--hal0-rad) 0;
+  padding-left: 14px;
+}
+
+// Role chips beside the poster name — amber for staff, quiet for the
+// original poster, matching the comp's .role / .role.op pair.
+.topic-meta-data .user-title,
+.topic-meta-data .post-admin-title {
+  font-family: var(--hal0-font-mono);
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: var(--hal0-ls-label);
+  border: 1px solid var(--hal0-accent-line);
+  color: var(--hal0-accent);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+.topic-post.original-poster .topic-meta-data .user-title {
+  border-color: var(--hal0-border-strong);
+  color: var(--hal0-fg-dim);
+}
+
+.topic-meta-data .names .username a {
+  font-size: 12.5px;
+  color: var(--hal0-fg);
+}
+.topic-meta-data .post-infos,
+.topic-meta-data .post-date {
+  font-family: var(--hal0-font-mono);
+  font-size: 11.5px;
+  color: var(--hal0-fg-faint);
+}
