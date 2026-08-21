@@ -112,6 +112,7 @@
   overflow: hidden;
 }
 
+.topic-list-header th.topic-list-data,
 .topic-list-header th,
 .topic-list-header .topic-list-data {
   font-family: var(--hal0-font-mono);
@@ -123,6 +124,18 @@
   border-bottom: 1px solid var(--hal0-border);
   padding: 9px 16px;
   background: none;
+
+  // Core sizes these in em off an inherited scale, which lands around
+  // 12.2px; the comp's column headers are a flat 10px.
+  button,
+  .d-button-label,
+  span {
+    font-size: 10px;
+    font-family: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    color: inherit;
+  }
 }
 .topic-list-header th.num,
 .topic-list-header th.posters {
@@ -279,8 +292,12 @@
 // Discourse's latest/new/unread/top controls map onto the comp's .fpill:
 // true pill, mono, amber-soft fill when active.
 .nav-pills > li > a,
-.list-controls .nav-pills > li > a {
+.list-controls .nav-pills > li > a,
+.list-controls .nav-pills > li > a.active {
+  box-sizing: border-box;
   height: 26px;
+  min-height: 26px;
+  line-height: 1;
   padding: 0 11px;
   display: inline-flex;
   align-items: center;
