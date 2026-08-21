@@ -222,21 +222,59 @@ body.hal0-chrome-active {
   padding: 16px 24px 0;
 }
 
-// ── header — the filament hairline is the signature: a 1px bottom
-// hairline that brightens to sodium amber at the centre. ────────────────
-.hal0-chrome.hdr {
+// ── header ──────────────────────────────────────────────────────────────
+//
+// There is ONE header: Discourse's own `.d-header`, restyled. The hal0 nav
+// and the "forum" slug are injected into it through the
+// `before-header-panel` outlet, which lands between the home logo and the
+// panel carrying search / notifications / avatar — the comp's forum-variant
+// order exactly. Discourse's controls stay native.
+//
+// The filament hairline is the chrome's signature: a 1px bottom hairline
+// that brightens to sodium amber at the centre, with a faint under-glow.
+// It lives on the sub-nav when the sub-nav is present (it is the bottom
+// edge of the header block) and on the header itself otherwise.
+.d-header {
   position: relative;
   z-index: 40;
   background: rgba(10, 10, 10, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  box-shadow: none;
+  // Core pins this to 3.66em/4em. The comp's bar is 56px, and the sub-nav
+  // is a second row inside the same element, so the height has to follow
+  // its contents. Discourse measures this element to publish
+  // --header-offset, so letting it grow is also what stops the sub-nav
+  // from sitting on top of the page.
+  height: auto;
 }
 @media (prefers-color-scheme: light) {
-  .hal0-chrome.hdr {
+  .d-header {
     background: rgba(250, 250, 249, 0.85);
   }
 }
-.hal0-chrome.hdr::after {
+.d-header .contents {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  min-height: 56px;
+}
+// The wordmark is rendered inline by the home-logo-contents connector, at
+// the comp's 19px lockup height.
+.hal0-chrome.hal0-home-wordmark {
+  display: inline-flex;
+  align-items: center;
+  color: var(--fg);
+}
+.hal0-chrome.hal0-home-wordmark svg {
+  display: block;
+  height: 19px;
+  width: auto;
+}
+
+// The filament, shared by whichever element is the bottom edge of the
+// header block.
+@mixin hal0-filament {
   content: "";
   position: absolute;
   left: 0;
@@ -253,27 +291,89 @@ body.hal0-chrome-active {
   );
   box-shadow: 0 1px 14px rgba(255, 176, 0, 0.09);
 }
-.hal0-chrome.hdr.sticky {
-  position: sticky;
-  top: 0;
+.d-header::after {
+  @include hal0-filament;
 }
-.hal0-chrome .hdr-in {
+// When the sub-nav is rendered it becomes the bottom edge, so the header's
+// own filament stands down and the sub-nav carries it instead.
+.d-header:has(.hal0-subnav)::after {
+  display: none;
+}
+
+// ── injected nav (before-header-panel) ──────────────────────────────────
+.hal0-chrome.hal0-hdr-nav {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+// ── sub-nav (after-header) — the comp's second bar ──────────────────────
+.hal0-chrome.hal0-subnav {
+  position: relative;
+  height: 42px;
   display: flex;
   align-items: center;
-  gap: 24px;
-  height: 56px;
+  // Same horizontal gutter core gives `.d-header > .wrap`, so the sub-nav's
+  // first tab lines up with the wordmark above it. .d-header is a column
+  // flex container that does not stretch its children, hence the explicit
+  // full width -- without it the bar shrink-wraps to its tabs and floats
+  // in the middle of the page.
+  width: 100%;
+  align-self: stretch;
+  padding: 0 var(--d-header-padding-x);
+  box-sizing: border-box;
 }
-.hal0-chrome .hdr-brand {
+.hal0-chrome.hal0-subnav::after {
+  @include hal0-filament;
+}
+// Carries core's `.wrap` as well, for the same max-width and centring as
+// the header row; these declarations only add the row layout and undo the
+// theme's own wider .wrap padding, which would double the gutter here.
+.hal0-chrome .hal0-subnav-in {
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
+  gap: 18px;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  margin: 0 auto;
+}
+.hal0-chrome .hal0-subnav-in a {
+  font-family: var(--jbm);
+  font-size: 12px;
+  text-transform: lowercase;
+  letter-spacing: var(--ls-tight);
+  color: var(--fg-3);
+  text-decoration: none;
+  position: relative;
+  padding: 4px 2px;
+}
+.hal0-chrome .hal0-subnav-in a:hover {
   color: var(--fg);
 }
-.hal0-chrome .hdr-brand svg {
-  display: block;
-  height: 19px;
-  width: auto;
+.hal0-chrome .hal0-subnav-in a[aria-current="page"] {
+  color: var(--accent);
+}
+// The 2px amber rail sits ON the filament, per the comp.
+.hal0-chrome .hal0-subnav-in a {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+}
+.hal0-chrome .hal0-subnav-in a[aria-current="page"]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
+}
+.hal0-chrome .hal0-subnav-away {
+  margin-left: auto;
 }
 .hal0-chrome .hdr-slug {
   font-family: var(--jbm);
@@ -315,10 +415,12 @@ body.hal0-chrome-active {
 .hal0-chrome .hdr-nav a:hover {
   color: var(--fg);
 }
-.hal0-chrome .hdr-nav a.on {
+.hal0-chrome .hdr-nav a.on,
+.hal0-chrome .hdr-nav a[aria-current="page"] {
   color: var(--accent);
 }
-.hal0-chrome .hdr-nav a.on::after {
+.hal0-chrome .hdr-nav a.on::after,
+.hal0-chrome .hdr-nav a[aria-current="page"]::after {
   content: "";
   position: absolute;
   left: 11px;

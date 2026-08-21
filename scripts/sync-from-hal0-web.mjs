@@ -127,8 +127,8 @@ console.log(`wrote scss/_hal0-tokens.scss (${darkDecls.length} dark tokens, ${li
 const nav = JSON.parse(readFileSync(navPath, "utf8"));
 
 // Header nav, minus the forum entry itself (the forum IS this site — it
-// gets its own hard-coded "forum" slug in the header markup, not a nav
-// link back to itself) and minus anything marked hidden in the source.
+// gets aria-current on a hard-coded entry in the nav connector, not a
+// duplicate link back to itself) and minus anything marked hidden.
 const headerLinks = nav.header
   .filter((l) => l.label !== "forum" && !l.hidden)
   .map((l) => ({
