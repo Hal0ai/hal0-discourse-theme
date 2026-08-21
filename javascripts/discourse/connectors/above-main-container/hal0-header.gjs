@@ -27,12 +27,16 @@ export default class Hal0Header extends Component {
     return (typeof settings !== "undefined" && settings.hal0_web_origin) || "https://hal0.dev";
   }
 
-  hrefFor(link) {
+  // Arrow function, not a method: `{{this.hrefFor link}}` invokes this as a
+  // template helper, and a plain method loses its receiver when called that
+  // way (`this` is undefined inside it, so `this.origin` throws). An arrow
+  // class field closes over the instance instead.
+  hrefFor = (link) => {
     if (link.external || /^https?:\/\//.test(link.href)) {
       return link.href;
     }
     return `${this.origin}${link.href}`;
-  }
+  };
 
   get enabled() {
     return typeof settings === "undefined" || settings.show_hal0_chrome !== false;
