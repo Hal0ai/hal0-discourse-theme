@@ -40,6 +40,8 @@ scripts/
   sync-from-hal0-web.mjs                      regenerates the two AUTO-GENERATED files above
   push-color-schemes.py                       installs about.json's colour schemes through the
                                                admin API (components can't ship them natively)
+  push-content-model.py                       tag groups, form templates and their category
+                                               assignments — the forum's structured post types
 LICENSE                                       Apache-2.0, matching the hal0 project
 ```
 
@@ -260,6 +262,38 @@ Still open:
       user's override, so the two layers would disagree. Bridging the chrome
       to Discourse's own `--primary`/`--secondary` variables would fix this
       properly and is the right shape for that work.
+
+## Forum content model
+
+`scripts/push-content-model.py` builds the forum's structured post types.
+It is not part of the theme — it ships here because this repo is already the
+place forum configuration lives in git, and the alternative was leaving the
+content model in a single Postgres database with no source of truth.
+
+Three post types, each a **core form template** (`enable_form_templates`,
+out of experimental since Discourse 2026.02) assigned to categories:
+
+| Template | Categories |
+|---|---|
+| hal0 · Runner profile | Setups & Profiles |
+| hal0 · Benchmark run | Benchmarks |
+| hal0 · Hardware report | Strix Halo, NPU / XDNA, Gorgon Halo |
+
+The structured dimensions are **tag groups** bound to `tag-chooser` fields —
+Intent, Lane, Model Family, Workload, Quant. This is the part that matters:
+a `tag-chooser` answer becomes a real Discourse tag, so it is filterable in
+the topic list, browsable at `/tags`, subscribable, and queryable from Data
+Explorer. Every other field type is enforced at entry but serialised into the
+post body as prose — the schema has only `form_templates` and
+`category_form_templates` tables, with no per-topic response storage.
+
+Practical consequence: put anything you will want to **sort or aggregate** on
+into a tag group. A numeric field like decode tok/s is captured as text and
+is not sortable. If that becomes a real need, the upgrade is
+[discourse-custom-wizard](https://github.com/paviliondev/discourse-custom-wizard),
+which adds genuinely queryable topic custom fields — and the tag taxonomy
+survives that migration unchanged, which is why starting native costs
+nothing.
 
 ## License
 
