@@ -37,14 +37,18 @@ export default class Hal0Footer extends Component {
     return (typeof settings !== "undefined" && settings.hal0_web_origin) || "https://hal0.dev";
   }
 
-  hrefFor(link) {
+  // Arrow functions, not methods: both are invoked from the template as
+  // `{{this.hrefFor l}}` / `{{this.iconSvg s.id}}`, and a plain method loses
+  // its receiver when called that way (`this` is undefined inside it, so
+  // `this.origin` throws). Arrow class fields close over the instance.
+  hrefFor = (link) => {
     if (link.external || /^https?:\/\//.test(link.href) || link.href.startsWith("mailto:")) {
       return link.href;
     }
     return `${this.origin}${link.href}`;
-  }
+  };
 
-  iconSvg(id) {
+  iconSvg = (id) => {
     const path = HAL0_ICON_PATHS[id];
     if (!path) {
       // Silently rendering nothing here would hide a real problem: it means
@@ -58,7 +62,7 @@ export default class Hal0Footer extends Component {
     return htmlSafe(
       `<svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="${path}"/></svg>`
     );
-  }
+  };
 
   get enabled() {
     return typeof settings === "undefined" || settings.show_hal0_chrome !== false;
