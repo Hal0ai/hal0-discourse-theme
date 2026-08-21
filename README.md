@@ -21,6 +21,8 @@ common/
   common.scss                                 entry point: token import, Discourse var bridge,
                                                .hal0-chrome scoped CSS (ported from hal0-site.css)
 stylesheets/
+  _hal0-discourse.scss                        Discourse-surface restyle: topic list, tags, category
+                                               badges, nav pills, accepted answer, role chips
   _hal0-tokens.scss                           AUTO-GENERATED — brand tokens as CSS custom properties.
                                                Must live here, not in common/: Discourse compiles
                                                common/common.scss as an entrypoint and resolves
@@ -129,11 +131,11 @@ result was two stacked bars, the wordmark drawn twice, and a mostly empty
 
 ## What is intentionally NOT themed here
 
-Per the design brief's split of responsibility — restyled through
-Discourse's own CSS variables / color scheme, not overridden with bespoke
-markup:
+Per the design brief's split of responsibility. Topic list rows, badges,
+tags, unread pills, category colours and the accepted-answer treatment ARE
+restyled — see `stylesheets/_hal0-discourse.scss`, which changes no markup
+and only targets classes Discourse already renders. Left entirely alone:
 
-- Topic list rows, badges, tags, unread pills, category colors
 - Avatars, user cards, the user menu, notifications panel
 - The composer, markdown editor, uploads
 - Moderation tools, admin UI
