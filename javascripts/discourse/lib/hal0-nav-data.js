@@ -9,12 +9,12 @@
 export const HAL0_HEADER_LINKS = [
   {
     "label": "learn",
-    "href": "/docs/getting-started/",
+    "href": "/docs/",
     "external": false
   },
   {
     "label": "benchmarks",
-    "href": "/docs/reference/model-roster-benchmark/",
+    "href": "/benchmarks/",
     "external": false
   },
   {
@@ -30,7 +30,12 @@ export const HAL0_FOOTER_COLUMNS = [
     "links": [
       {
         "label": "docs",
-        "href": "/docs/getting-started/",
+        "href": "/docs/",
+        "external": false
+      },
+      {
+        "label": "knowledge base",
+        "href": "/docs/#knowledge-base",
         "external": false
       },
       {
@@ -41,11 +46,6 @@ export const HAL0_FOOTER_COLUMNS = [
       {
         "label": "changelog",
         "href": "/changelog",
-        "external": false
-      },
-      {
-        "label": "releases",
-        "href": "/releases",
         "external": false
       }
     ]
@@ -80,7 +80,7 @@ export const HAL0_FOOTER_COLUMNS = [
     "links": [
       {
         "label": "benchmarks",
-        "href": "/docs/reference/model-roster-benchmark/",
+        "href": "/benchmarks/",
         "external": false
       },
       {

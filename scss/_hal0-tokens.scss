@@ -43,6 +43,10 @@
   --hal0-dev-vulkan: #7fb8ff;
   --hal0-dev-cpu: #9c9c95;
   --hal0-dev-npu: #c896ff;
+  --hal0-fast: #3fb950;
+  --hal0-mid: var(--hal0-accent);
+  --hal0-slow: #f85149;
+  --hal0-cap-vision: #6cb6ff;
   --hal0-font-mono: 'JetBrains Mono', 'JBM Fallback', ui-monospace, 'SF Mono', Menlo, monospace;
   --hal0-font-body: 'Geist Variable', 'Geist', 'Geist Fallback', system-ui, -apple-system, BlinkMacSystemFont,
 	                      'Segoe UI', Roboto, sans-serif;
@@ -58,6 +62,7 @@
   --hal0-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --hal0-dur-fast: 0.12s;
   --hal0-shadow-menu: 0 16px 48px -8px rgba(0,0,0,0.7);
+  --hal0-shadow-drawer: -24px 0 64px -16px rgba(0,0,0,0.6);
 }
 
 html.light-scheme,
@@ -81,4 +86,22 @@ html:not(.dark-scheme) .hal0-force-light {
   --hal0-accent-soft: rgba(184, 120, 0, 0.09);
   --hal0-accent-line: rgba(184, 120, 0, 0.34);
   --hal0-accent-glow: rgba(184, 120, 0, 0.16);
+  --hal0-ok: #1a7f37;
+  --hal0-ok-soft: rgba(26, 127, 55, 0.10);
+  --hal0-ok-line: rgba(26, 127, 55, 0.30);
+  --hal0-warn: #8a5a00;
+  --hal0-warn-soft: rgba(138, 90, 0, 0.10);
+  --hal0-warn-line: rgba(138, 90, 0, 0.30);
+  --hal0-err: #cf222e;
+  --hal0-err-soft: rgba(207, 34, 46, 0.10);
+  --hal0-err-line: rgba(207, 34, 46, 0.30);
+  --hal0-info: #1f5fbf;
+  --hal0-info-soft: rgba(31, 95, 191, 0.10);
+  --hal0-info-line: rgba(31, 95, 191, 0.30);
+  --hal0-dev-rocm: #a32e2e;
+  --hal0-dev-vulkan: #1f5fbf;
+  --hal0-dev-npu: #6b3fbf;
+  --hal0-dev-cpu: #5c5c58;
+  --hal0-fast: #1a7f37;
+  --hal0-slow: #cf222e;
 }
