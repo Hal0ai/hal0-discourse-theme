@@ -51,7 +51,7 @@ export default class Hal0Subnav extends Component {
   <template>
     {{#if this.enabled}}
       <div class="hal0-chrome hal0-subnav">
-        <div class="wrap wide hal0-subnav-in">
+        <div class="wrap hal0-subnav-in">
           {{#each this.tabs as |tab|}}
             <a
               href={{tab.href}}

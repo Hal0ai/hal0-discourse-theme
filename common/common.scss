@@ -241,6 +241,12 @@ body.hal0-chrome-active {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   box-shadow: none;
+  // Core pins this to 3.66em/4em. The comp's bar is 56px, and the sub-nav
+  // is a second row inside the same element, so the height has to follow
+  // its contents. Discourse measures this element to publish
+  // --header-offset, so letting it grow is also what stops the sub-nav
+  // from sitting on top of the page.
+  height: auto;
 }
 @media (prefers-color-scheme: light) {
   .d-header {
@@ -253,10 +259,15 @@ body.hal0-chrome-active {
   gap: 20px;
   min-height: 56px;
 }
-// The site logo is the wordmark. Match the comp's 19px lockup so it reads
-// the same height as it does on hal0.dev.
-.d-header .home-logo-wrapper-outlet #site-logo,
-.d-header .home-logo-wrapper-outlet .logo-big {
+// The wordmark is rendered inline by the home-logo-contents connector, at
+// the comp's 19px lockup height.
+.hal0-chrome.hal0-home-wordmark {
+  display: inline-flex;
+  align-items: center;
+  color: var(--fg);
+}
+.hal0-chrome.hal0-home-wordmark svg {
+  display: block;
   height: 19px;
   width: auto;
 }
@@ -304,15 +315,24 @@ body.hal0-chrome-active {
   height: 42px;
   display: flex;
   align-items: center;
+  // Same horizontal gutter core gives `.d-header > .wrap`, so the sub-nav's
+  // first tab lines up with the wordmark above it.
+  padding: 0 var(--d-header-padding-x);
+  box-sizing: border-box;
 }
 .hal0-chrome.hal0-subnav::after {
   @include hal0-filament;
 }
+// Carries core's `.wrap` as well, for the same max-width and centring as
+// the header row; these declarations only add the row layout and undo the
+// theme's own wider .wrap padding, which would double the gutter here.
 .hal0-chrome .hal0-subnav-in {
   display: flex;
   align-items: center;
   gap: 18px;
   width: 100%;
+  height: 100%;
+  padding: 0;
 }
 .hal0-chrome .hal0-subnav-in a {
   font-family: var(--jbm);
@@ -331,14 +351,20 @@ body.hal0-chrome-active {
   color: var(--accent);
 }
 // The 2px amber rail sits ON the filament, per the comp.
+.hal0-chrome .hal0-subnav-in a {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+}
 .hal0-chrome .hal0-subnav-in a[aria-current="page"]::after {
   content: "";
   position: absolute;
   left: 0;
   right: 0;
-  bottom: -10px;
+  bottom: 0;
   height: 2px;
   background: var(--accent);
+  box-shadow: 0 0 8px var(--accent-glow);
 }
 .hal0-chrome .hal0-subnav-away {
   margin-left: auto;
