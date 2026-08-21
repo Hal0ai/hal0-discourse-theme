@@ -38,6 +38,8 @@ connectors-classic/                           reference-only classic Handlebars 
   below-footer/hal0-footer.hbs
 scripts/
   sync-from-hal0-web.mjs                      regenerates the two AUTO-GENERATED files above
+  push-color-schemes.py                       installs about.json's colour schemes through the
+                                               admin API (components can't ship them natively)
 LICENSE                                       Apache-2.0, matching the hal0 project
 ```
 
@@ -51,9 +53,33 @@ https://github.com/Hal0ai/hal0-discourse-theme
 
 Install it as a **component**, then add it to whatever theme is active on
 `forum.hal0.dev` (Themes → your active theme → Components → add "hal0 forum
-theme"). Under the theme's **Colors** tab, set the default color scheme to
-"hal0 dark" (and, if the forum offers a light/dark toggle, "hal0 light" as
-the alternate scheme).
+theme").
+
+Then push the colour schemes — **this step is not optional and is not done
+for you**:
+
+```bash
+python3 scripts/push-color-schemes.py          # add --dry-run first to preview
+```
+
+Discourse **ignores `color_schemes` declared by a theme component**. Core's
+`app/models/remote_theme.rb` guards the import with:
+
+```ruby
+update_theme_color_schemes(theme, theme_info["color_schemes"]) unless theme.component
+```
+
+So installing this component gets you the chrome and the `--hal0-*` tokens,
+but leaves Discourse's own palette (topic rows, buttons, badges, links) on
+whatever the base theme shipped — stock light, in practice. The script
+creates "hal0 dark" and "hal0 light" from `about.json` through the admin API
+and points the base theme's two palette slots at them, so `about.json` stays
+the single source of truth and the palette does not quietly drift into the
+site database. Re-run it whenever `about.json`'s colours change.
+
+Credentials come from `/srv/secrets/discourse-api.env` on the forum host, or
+from `DISCOURSE_URL` / `DISCOURSE_API_KEY` / `DISCOURSE_API_USERNAME` in the
+environment. See `--help`.
 
 Two theme settings (Customize → Themes → hal0 forum theme → Settings):
 
@@ -180,30 +206,44 @@ and commit the diff whenever hal0-web's tokens or nav change.
   future sync step to `changelog.js`'s `parseChangelog()` if that drifts
   often enough to be annoying.
 
-## Validation (deferred to launch)
+## Validation
 
-**There is no live Discourse instance to test against.** Everything above is
-built against the design comp, `nav.json`/`tokens.css`, and Discourse's
-documented plugin-outlet / theme-component conventions — not verified in a
-running forum. Before calling this done:
+Installed and exercised against the live `forum.hal0.dev` (Discourse 8.0.5.1)
+as a component of the Foundation base theme.
 
-- [ ] Install on the actual `forum.hal0.dev` Discourse (or a staging copy)
-      via the git-repo installer above.
-- [ ] Screenshot the categories index, a topic list, and an open topic;
-      compare against `07 Forum.html`'s `CategoryIndex` / `TopicList` /
-      `TopicView` states (the header/footer strip is this theme's job — the
-      topic rows/badges/avatars in between are Discourse's own components
-      restyled by the color scheme, so check those too, they're not exempt
-      from the comparison just because this repo didn't write their markup).
+Done:
+
+- [x] Installed via the git-repo installer. Needed three fixes first — the
+      stylesheet did not compile (partial in the wrong directory) and both
+      connectors threw on every render (methods invoked as template helpers
+      lose `this`). See the commit history.
+- [x] Colour schemes: found that components cannot ship them at all, and
+      added `scripts/push-color-schemes.py` to close the gap. See
+      [Install](#install).
+- [x] `html.light-scheme` — **confirmed wrong**. Those are classes on the
+      `<link>` elements for the two colour-scheme stylesheets, not on
+      `<html>`; Discourse switches palettes with
+      `(prefers-color-scheme: light)`
+      (`application_helper.rb#light_elements_media_query`). The generated
+      token file now uses that media query.
+- [x] Wordmark — was rendering as a 19×19 speck because the inlined SVG kept
+      the brand file's 1500×1500 square canvas. Cropped to the lettering's
+      own band, matching hal0-web's `Wordmark.astro`.
+- [x] Zero console errors on the categories index; brand strip renders once
+      with all three nav links resolving against `hal0_web_origin`, footer
+      renders with all three columns and its social row.
+
+Still open:
+
+- [ ] Screenshot the topic list and an open topic and compare against
+      `07 Forum.html`'s `TopicList` / `TopicView` states. Only the categories
+      index has been compared so far. The topic rows/badges/avatars are
+      Discourse's own components restyled by the colour scheme — they are not
+      exempt from the comparison just because this repo didn't write them.
 - [ ] Confirm the brand strip's sticky/backdrop-blur behavior doesn't fight
       with Discourse's own sticky header (two stacked `position: sticky`
       elements can behave oddly depending on Discourse's header height and
       scroll-shrink behavior on mobile).
-- [ ] Confirm `html.light-scheme` is in fact the class Discourse's core adds
-      when a user or the OS prefers light mode — `_hal0-tokens.scss`'s light
-      override selector is a best guess based on newer Discourse core
-      conventions and is explicitly unverified (see the comment at the top
-      of that file).
 - [ ] Decide whether the brand-strip-below-native-header approach (see
       [How the header actually attaches](#how-the-header-actually-attaches))
       is acceptable, or whether full header replacement is required — and if
@@ -215,6 +255,11 @@ running forum. Before calling this done:
 - [ ] Mobile: confirm the brand strip's nav links don't create a confusing
       double-hamburger situation next to Discourse's own mobile header
       controls.
+- [ ] Manual light/dark toggle (`interface_color_selector`) is **not
+      supported** — the chrome's tokens follow the OS preference, not the
+      user's override, so the two layers would disagree. Bridging the chrome
+      to Discourse's own `--primary`/`--secondary` variables would fix this
+      properly and is the right shape for that work.
 
 ## License
 
