@@ -3,9 +3,19 @@
 // Regenerate with: node scripts/sync-from-hal0-web.mjs [hal0-web-dir]
 //
 // Dark is the default surface everywhere on the forum (matches hal0-web).
-// Light overrides apply under Discourse's own light-scheme signal — see the
-// README's "Validation (deferred to launch)" section, this is unverified
-// against a live Discourse install.
+//
+// Light overrides ride on `(prefers-color-scheme: light)` because that is
+// literally the signal Discourse itself switches palettes on — see core's
+// application_helper.rb#light_elements_media_query. An earlier version of
+// this file keyed off `html.light-scheme`, which never matched anything:
+// "light-scheme"/"dark-scheme" are classes Discourse puts on the <link>
+// elements for the two colour-scheme stylesheets, not on <html>.
+//
+// Consequence worth knowing: this follows the OS preference only. If the
+// forum enables `interface_color_selector`, a visitor who manually forces
+// light while their OS is dark gets Discourse's light palette but these
+// dark tokens. Keep the selector disabled, or bridge the chrome to
+// Discourse's own --primary/--secondary variables, before turning it on.
 
 :root {
   --hal0-accent: #ffb000;
@@ -65,8 +75,49 @@
   --hal0-shadow-drawer: -24px 0 64px -16px rgba(0,0,0,0.6);
 }
 
-html.light-scheme,
-html:not(.dark-scheme) .hal0-force-light {
+@media (prefers-color-scheme: light) {
+  :root {
+    --hal0-bg: #fafaf9;
+    --hal0-bg-elevated: #ffffff;
+    --hal0-bg-2: #f3f2f0;
+    --hal0-bg-3: #ebe9e6;
+    --hal0-bg-sunken: #f0eeea;
+    --hal0-fg: #1c1917;
+    --hal0-fg-muted: #44403c;
+    --hal0-fg-dim: #6b6660;
+    --hal0-fg-faint: #8f8a83;
+    --hal0-fg-ghost: #bfbab3;
+    --hal0-border: #e7e5e4;
+    --hal0-border-soft: #f0eeec;
+    --hal0-border-strong: #cfccc8;
+    --hal0-accent: #b87800;
+    --hal0-accent-hover: #8a5a00;
+    --hal0-accent-muted: #f7d680;
+    --hal0-accent-soft: rgba(184, 120, 0, 0.09);
+    --hal0-accent-line: rgba(184, 120, 0, 0.34);
+    --hal0-accent-glow: rgba(184, 120, 0, 0.16);
+    --hal0-ok: #1a7f37;
+    --hal0-ok-soft: rgba(26, 127, 55, 0.10);
+    --hal0-ok-line: rgba(26, 127, 55, 0.30);
+    --hal0-warn: #8a5a00;
+    --hal0-warn-soft: rgba(138, 90, 0, 0.10);
+    --hal0-warn-line: rgba(138, 90, 0, 0.30);
+    --hal0-err: #cf222e;
+    --hal0-err-soft: rgba(207, 34, 46, 0.10);
+    --hal0-err-line: rgba(207, 34, 46, 0.30);
+    --hal0-info: #1f5fbf;
+    --hal0-info-soft: rgba(31, 95, 191, 0.10);
+    --hal0-info-line: rgba(31, 95, 191, 0.30);
+    --hal0-dev-rocm: #a32e2e;
+    --hal0-dev-vulkan: #1f5fbf;
+    --hal0-dev-npu: #6b3fbf;
+    --hal0-dev-cpu: #5c5c58;
+    --hal0-fast: #1a7f37;
+    --hal0-slow: #cf222e;
+  }
+}
+
+.hal0-force-light {
   --hal0-bg: #fafaf9;
   --hal0-bg-elevated: #ffffff;
   --hal0-bg-2: #f3f2f0;
