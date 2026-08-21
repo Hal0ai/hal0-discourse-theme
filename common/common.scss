@@ -316,7 +316,12 @@ body.hal0-chrome-active {
   display: flex;
   align-items: center;
   // Same horizontal gutter core gives `.d-header > .wrap`, so the sub-nav's
-  // first tab lines up with the wordmark above it.
+  // first tab lines up with the wordmark above it. .d-header is a column
+  // flex container that does not stretch its children, hence the explicit
+  // full width -- without it the bar shrink-wraps to its tabs and floats
+  // in the middle of the page.
+  width: 100%;
+  align-self: stretch;
   padding: 0 var(--d-header-padding-x);
   box-sizing: border-box;
 }
@@ -333,6 +338,7 @@ body.hal0-chrome-active {
   width: 100%;
   height: 100%;
   padding: 0;
+  margin: 0 auto;
 }
 .hal0-chrome .hal0-subnav-in a {
   font-family: var(--jbm);
