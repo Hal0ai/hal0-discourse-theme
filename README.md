@@ -35,6 +35,12 @@ stylesheets/
   _hal0-discourse.scss                        Discourse-surface restyle: topic list, tags, category
                                                badges/page, nav pills, accepted answer, role chips,
                                                sidebar, welcome banner, header/banner search
+  _hal0-docs.scss                             /docs (discourse-docs plugin) restyle: search field,
+                                               category/tag filter sidebar, docs-topic-list as a
+                                               .dtable, docs-topic back-link — plus the
+                                               discourse-docs-card-filter component's cards as the
+                                               KB category-card anatomy (icon, mono title, blurb,
+                                               hover filament)
   _hal0-tokens.scss                           AUTO-GENERATED — the --hal0-* tokens that are
                                                identical in both schemes (fonts, radii, motion).
                                                Must live here, not in common/: Discourse compiles
