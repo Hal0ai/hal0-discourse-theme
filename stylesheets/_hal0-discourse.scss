@@ -356,8 +356,30 @@
 }
 
 // ─── categories index ───────────────────────────────────────────────────
-// The comp gives each category row a 4px colour rail. Discourse publishes
-// the category colour on the row, so the rail is drawn from it.
+// Same card treatment as .topic-list above: 1px border, large radius,
+// elevated surface. Discourse renders this as a bare <table> too.
+.category-list {
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad-lg);
+  background: var(--hal0-bg-elevated);
+  border-collapse: separate;
+  border-spacing: 0;
+  overflow: hidden;
+}
+.category-list tbody tr:not(:last-child) > td {
+  border-bottom: 1px solid var(--hal0-border-soft);
+}
+.category-list tbody tr:hover > td {
+  background: var(--hal0-bg-2);
+}
+// The comp gives each category row a 4px colour rail. Discourse already
+// draws this from the category's own colour (core's category-list.scss:
+// `border-left: 6px solid var(--category-badge-color, var(--primary-low))`)
+// — narrow it to the comp's 4px, keep the same var so it still tracks each
+// category's real colour, not a brand-wide override.
+.category-list tbody .category {
+  border-left-width: 4px;
+}
 .category-list .category h3 a,
 .category-list-item .category-name {
   font-family: var(--hal0-font-mono);
@@ -366,6 +388,15 @@
 .category-list-item .category-description,
 .category-list td.category .category-description {
   color: var(--hal0-fg-dim);
+}
+// Grid/box variants (category_style site setting) — the box's neutral
+// surface/border go brand, its accent-coloured left rail (--category-badge-
+// -color, same as the table rail above) is left completely alone.
+:root {
+  --d-category-box-background-color: var(--hal0-bg-elevated);
+}
+.category-box .category-box-inner {
+  border-color: var(--hal0-border);
 }
 
 // ─── topic view ─────────────────────────────────────────────────────────
@@ -407,4 +438,107 @@
   font-family: var(--hal0-font-mono);
   font-size: 11.5px;
   color: var(--hal0-fg-faint);
+}
+
+// ─── sidebar ────────────────────────────────────────────────────────────
+// Restyled through core's own theming surface — the --d-sidebar-* custom
+// properties (app/assets/stylesheets/common/base/sidebar.scss) that every
+// sidebar rule already reads instead of a hardcoded colour. Declared once
+// at :root, same as core's own defaults, so nothing here can leak onto a
+// class that isn't part of the sidebar — these variables are consumed
+// exclusively by .sidebar-* selectors. The sidebar markup itself (sections,
+// links, filter, footer) is untouched.
+:root {
+  --d-sidebar-background: var(--hal0-bg-elevated);
+  --d-sidebar-border-color: var(--hal0-border);
+  --d-sidebar-section-border-color: var(--hal0-border-soft);
+  --d-sidebar-header-color: var(--hal0-fg-dim);
+  --d-sidebar-header-icon-color: var(--hal0-fg-dim);
+  --d-sidebar-link-color: var(--hal0-fg-muted);
+  --d-sidebar-link-icon-color: var(--hal0-fg-dim);
+  --d-sidebar-link-badge-color: var(--hal0-fg-dim);
+  --d-sidebar-prefix-background: var(--hal0-bg-3);
+  --d-sidebar-suffix-color: var(--hal0-accent);
+  --d-sidebar-highlight-background: var(--hal0-bg-2);
+  --d-sidebar-highlight-color: var(--hal0-fg);
+  --d-sidebar-highlight-prefix-background: var(--hal0-bg-3);
+  --d-sidebar-highlight-hover-background: var(--hal0-bg-3);
+  --d-sidebar-highlight-hover-icon: var(--hal0-fg);
+  --d-sidebar-active-background: var(--hal0-accent-soft);
+  --d-sidebar-active-color: var(--hal0-accent);
+  --d-sidebar-active-icon-color: var(--hal0-accent);
+  --d-sidebar-active-prefix-background: var(--hal0-bg-3);
+}
+// Not covered by a --d-sidebar-* variable: typeface. Scoped to the
+// sidebar's own root element, same reasoning as .hal0-chrome elsewhere in
+// this repo — only children of .sidebar-wrapper pick this up.
+.sidebar-wrapper {
+  font-family: var(--hal0-font-mono);
+  letter-spacing: var(--hal0-ls-tight);
+}
+.sidebar-section-header-wrapper {
+  text-transform: lowercase;
+}
+// The link/tag filter field at the top of the sidebar — brand's input
+// treatment (bg-1 fill, hairline border), matching the header search field
+// below rather than Discourse's default form-control styling.
+.sidebar-filter__input,
+.sidebar-search__input-container {
+  background: var(--hal0-bg-elevated);
+  border-color: var(--hal0-border);
+  font-family: var(--hal0-font-mono);
+}
+
+// ─── header search + welcome banner search ─────────────────────────────
+// One shared component (SearchMenu) renders the actual <input> in both the
+// header's floating/dropdown search and the welcome banner's inline search
+// — `.search-input .search-term__input` is the same markup in both places,
+// so one rule covers both surfaces per the design's search field spec (30px
+// tall look, --bg-1 fill, mono placeholder, hairline border). Deliberately
+// NOT touching `.search-container` (the full-page /search results view) —
+// see the README's "what is NOT themed here" list.
+.search-menu .search-input,
+.welcome-banner__search-menu .search-input {
+  background: var(--hal0-bg-elevated);
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad-sm);
+  transition: border-color var(--hal0-dur-fast) var(--hal0-ease);
+}
+.search-menu .search-input:focus-within,
+.welcome-banner__search-menu .search-input:focus-within {
+  border-color: var(--hal0-border-strong);
+}
+.search-menu .search-term__input,
+.welcome-banner__search-menu .search-term__input {
+  font-family: var(--hal0-font-mono);
+  font-size: 12.5px;
+  color: var(--hal0-fg);
+
+  &::placeholder {
+    color: var(--hal0-fg-faint);
+    font-family: var(--hal0-font-mono);
+  }
+}
+.search-menu .search-icon,
+.welcome-banner .btn.search-icon {
+  color: var(--hal0-fg-dim);
+}
+.search-menu-panel {
+  background: var(--hal0-bg-elevated);
+  border: 1px solid var(--hal0-border);
+}
+
+// The banner itself — brand surface + mono heading, same treatment as
+// every other mono display heading in this repo.
+.welcome-banner {
+  background: var(--hal0-bg-elevated);
+  border: 1px solid var(--hal0-border);
+}
+.welcome-banner__title {
+  font-family: var(--hal0-font-mono);
+  letter-spacing: var(--hal0-ls-title);
+  color: var(--hal0-fg);
+}
+.welcome-banner__subheader {
+  color: var(--hal0-fg-dim);
 }

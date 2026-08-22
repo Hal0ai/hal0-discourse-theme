@@ -22,7 +22,8 @@ common/
                                                .hal0-chrome scoped CSS (ported from hal0-site.css)
 stylesheets/
   _hal0-discourse.scss                        Discourse-surface restyle: topic list, tags, category
-                                               badges, nav pills, accepted answer, role chips
+                                               badges/page, nav pills, accepted answer, role chips,
+                                               sidebar, welcome banner, header/banner search
   _hal0-tokens.scss                           AUTO-GENERATED — brand tokens as CSS custom properties.
                                                Must live here, not in common/: Discourse compiles
                                                common/common.scss as an entrypoint and resolves
@@ -132,14 +133,17 @@ result was two stacked bars, the wordmark drawn twice, and a mostly empty
 ## What is intentionally NOT themed here
 
 Per the design brief's split of responsibility. Topic list rows, badges,
-tags, unread pills, category colours and the accepted-answer treatment ARE
-restyled — see `stylesheets/_hal0-discourse.scss`, which changes no markup
-and only targets classes Discourse already renders. Left entirely alone:
+tags, unread pills, category colours and layout, the accepted-answer
+treatment, the sidebar, the welcome banner, and header/welcome-banner search
+ARE restyled — see `stylesheets/_hal0-discourse.scss`, which changes no
+markup and only targets classes (or, for the sidebar, the `--d-sidebar-*`
+custom properties) Discourse already renders/exposes. Left entirely alone:
 
 - Avatars, user cards, the user menu, notifications panel
 - The composer, markdown editor, uploads
 - Moderation tools, admin UI
-- Discourse's own search (full-page search and the header search dropdown)
+- Discourse's own full-page search (`/search` results view) — only the
+  header/welcome-banner search *input* is restyled, not the results page
 - Discourse's native header itself (see above) — only restyled, not replaced
 
 Only the injected nav, sub-nav, wordmark and footer are bespoke markup.
