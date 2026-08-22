@@ -322,38 +322,12 @@
 }
 
 // ─── navigation pills ───────────────────────────────────────────────────
-// Discourse's latest/new/unread/top controls map onto the comp's .fpill:
-// true pill, mono, amber-soft fill when active.
-.nav-pills > li > a,
-.list-controls .nav-pills > li > a,
-.list-controls .nav-pills > li > a.active {
-  box-sizing: border-box;
-  height: 26px;
-  min-height: 26px;
-  line-height: 1;
-  padding: 0 11px;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid var(--hal0-border);
-  border-radius: var(--hal0-rad-pill);
-  background: var(--hal0-bg-elevated);
-  color: var(--hal0-fg-dim);
-  font-family: var(--hal0-font-mono);
-  font-size: 11.5px;
-  transition: all var(--hal0-dur-fast) var(--hal0-ease);
-}
-.nav-pills > li > a:hover {
-  border-color: var(--hal0-border-strong);
-  color: var(--hal0-fg);
-  background: var(--hal0-bg-elevated);
-}
-.nav-pills > li > a.active,
-.nav-pills > li.active > a {
-  background: var(--hal0-accent-soft);
-  border-color: var(--hal0-accent-line);
-  color: var(--hal0-accent);
-}
+// Moved to _hal0-controls.scss. It used to map Discourse's
+// latest/new/hot/categories bar onto the comp's `.fpill`, which is the
+// *filter* primitive, not the nav one — the active tab ended up styled
+// identically to the inactive ones and core's underline was the only thing
+// distinguishing them. It is now the comp's `.dtabs`, driven through core's
+// own `--d-nav-*` custom properties.
 
 // ─── categories index ───────────────────────────────────────────────────
 // Same card treatment as .topic-list above: 1px border, large radius,
