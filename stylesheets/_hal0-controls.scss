@@ -384,6 +384,13 @@
   --d-tag-font-size: 10px;
   --d-tag-background-color: transparent;
 
+  // "Weight tops out at 600. Emphasis comes from colour and mono, not
+  // weight." Core defaults this to `bold`, and every heading it renders on
+  // a page this theme doesn't restyle by hand (/tags, /about, /faq) picks
+  // it up — those already inherit the mono face, they were just heavier
+  // than the scale allows.
+  --heading-font-weight: 600;
+
   // The design's own hover/active accents, so anything reading core's
   // tertiary ramp lands on sodium amber rather than the scheme's
   // approximation of it.
