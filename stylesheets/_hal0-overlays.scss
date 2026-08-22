@@ -237,6 +237,15 @@
   // retargeting it for the card also rounds every button inside the card to
   // 10px. Pin the buttons back to the 4px the .btn spec asks for.
   --d-button-border-radius: var(--hal0-rad-sm);
+}
+// The border goes on the *shown* state only. Discourse keeps a collapsed
+// `.user-card` / `.group-card` in the DOM on every page and only adds
+// `.show` when one is summoned; an unconditional border paints a stray 2px
+// hairline bar across the page below the content while the card is closed
+// (seen on /categories). Core's own rule is on `#user-card.show` for the
+// same reason.
+.user-card.show,
+.group-card.show {
   border: 1px solid var(--hal0-border);
 }
 .user-card .names__primary,
