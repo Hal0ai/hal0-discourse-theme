@@ -396,7 +396,21 @@
 // "Accessibility"). Core's own `default-focus` mixin draws a --tertiary
 // outline at 0 offset from a handful of component rules; this is the floor
 // under all of them.
-:focus-visible {
+//
+// Enumerated rather than a bare `:focus-visible`, deliberately. Discourse
+// moves focus to a `tabindex="-1"` container on every route change so screen
+// readers announce the new page (`app/lib/…` route-change a11y helper); a
+// blanket rule can paint a 2px amber box around the whole main outlet or an
+// open modal when that happens. Only things a visitor can actually focus by
+// intent get the ring.
+a[href]:focus-visible,
+button:focus-visible,
+summary:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible,
+[tabindex="0"]:focus-visible {
   outline: 2px solid var(--hal0-accent);
   outline-offset: 3px;
 }
