@@ -45,6 +45,10 @@ stylesheets/
                                                (--d-post-control-*), the topic map, the timeline
                                                scrubber, topic progress and the suggested-topics
                                                label
+  _hal0-overlays.scss                         Floating layers: modals and the confirm dialog, the
+                                               keyboard-shortcuts modal, login/signup, menus and
+                                               notification panels, toasts and notices, user cards,
+                                               the header search dropdown and the /search page
   _hal0-docs.scss                             Docs/KB surface restyle: doc-categories' sidebar panel
                                                (.discourse-docs-sidebar-panel), and the Knowledge
                                                Base (body.category-kb) + Docs (body.category-docs)
@@ -187,11 +191,11 @@ ARE restyled — see `stylesheets/_hal0-discourse.scss`, which changes no
 markup and only targets classes (or, for the sidebar, the `--d-sidebar-*`
 custom properties) Discourse already renders/exposes. Left entirely alone:
 
-- Avatars, user cards, the user menu, notifications panel
+- Avatars — the images themselves. The cards, menus and panels they sit in
+  ARE restyled (see `stylesheets/_hal0-overlays.scss`); only the avatar
+  image is left as Discourse renders it.
 - The composer, markdown editor, uploads
 - Moderation tools, admin UI
-- Discourse's own full-page search (`/search` results view) — only the
-  header/welcome-banner search *input* is restyled, not the results page
 - Discourse's native header itself (see above) — only restyled, not replaced
 
 Only the injected nav, sub-nav, wordmark and footer are bespoke markup.
