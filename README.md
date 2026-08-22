@@ -49,6 +49,10 @@ stylesheets/
                                                keyboard-shortcuts modal, login/signup, menus and
                                                notification panels, toasts and notices, user cards,
                                                the header search dropdown and the /search page
+  _hal0-lists.scss                            List surfaces: the categories index (rows, counts,
+                                               subcategories, the "latest" column), the category and
+                                               tag page headers, the /tags cloud, list-bottom chrome
+                                               and empty states
   _hal0-docs.scss                             Docs/KB surface restyle: doc-categories' sidebar panel
                                                (.discourse-docs-sidebar-panel), and the Knowledge
                                                Base (body.category-kb) + Docs (body.category-docs)
