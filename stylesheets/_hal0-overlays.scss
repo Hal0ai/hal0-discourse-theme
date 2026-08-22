@@ -1,0 +1,375 @@
+// hal0 → Discourse overlay restyle: modals, floating menus, toasts, user
+// cards and search.
+//
+// This is the "genuinely floating layer" half of the surface split — see
+// _hal0-discourse.scss's header for the split of responsibility and the
+// README's "what is NOT themed here" list (which this file moves user
+// cards, the user menu/notifications, and full-page search OUT of — the
+// operator asked for them in this sweep).
+//
+// Method: current Discourse exposes a --d-* custom-property surface that
+// most of these components already read (border colour, background,
+// shadow). A sibling change owns the global bridge for
+// --content-border-color / --input-border-color / --shadow-card /
+// --shadow-modal / --shadow-dropdown / --shadow-menu-panel and the
+// --d-button-* / --d-nav-* / select-kit surfaces — nothing here
+// redeclares those. What's left, and what this file does, is layout,
+// type, spacing, radius and the parts of each component no variable
+// reaches.
+//
+// Source of truth is the comp pack:
+//   design_handoff_hal0_platform/01 Unified Chrome.html — .pal (⌘K palette)
+//     is the acceptance reference for a floating result list: bg-1 fill,
+//     line-strong hairline, rad-lg, shadow-menu, grouped rows with a
+//     lowercase mono label header and a right-aligned source tag.
+//   design_handoff_hal0_platform/hal0-site.css — .fpill / .well / .dtable
+//   design_handoff_hal0_platform/_ds/…/components.css — .btn / .chip / .dot
+//     / .banner (the tonal-border notice shape .alert below borrows from)
+//
+// Comp idea              → Discourse class
+//   .pal / .pal-row       → .search-menu-panel / .menu-panel, .search-link
+//   .pal-grp .label       → .results .heading h4
+//   .pal-row .src         → (no equivalent element — left alone)
+//   .banner / .banner-*   → .alert, .global-notice
+//   .card                 → .user-card, .group-card
+//
+// Radii follow the scale in the design brief: 6px (menus, inputs) for
+// floating panels and form fields, 10px (cards) for modals and cards —
+// modals are the one "floating" surface large enough to read as a card
+// shape rather than a menu.
+
+// ─── modals ──────────────────────────────────────────────────────────────
+// .d-modal__container already gets --shadow-modal (bridged to
+// --hal0-shadow-menu) and --secondary (hal0 bg) from elsewhere — only the
+// corner radius and the title's display treatment are ours to set.
+.d-modal__container {
+  border-radius: var(--hal0-rad-lg);
+}
+.d-modal__title-text {
+  font-family: var(--hal0-font-mono);
+  font-weight: 500;
+  letter-spacing: var(--hal0-ls-title);
+}
+.d-modal__subtitle-text {
+  color: var(--hal0-fg-dim);
+}
+
+// The confirm/alert dialog (dialog-service) — e.g. "Sorry, an error has
+// occurred" — is a separate, smaller component from .d-modal.
+.dialog-content {
+  border-radius: var(--hal0-rad-lg);
+}
+.dialog-header h3 {
+  font-family: var(--hal0-font-mono);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: var(--hal0-ls-title);
+}
+
+// Keyboard shortcuts modal (`?`) — a --max modal with its own two-column
+// help grid. The category boxes get the same hairline-and-mono treatment
+// as every other labelled block in this theme.
+.keyboard-shortcuts-modal {
+  .shortcut-category {
+    border-radius: var(--hal0-rad);
+
+    h2 {
+      font-family: var(--hal0-font-mono);
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: lowercase;
+      letter-spacing: var(--hal0-ls-label);
+      color: var(--hal0-fg-dim);
+    }
+  }
+  #keyboard-shortcuts-help kbd {
+    font-family: var(--hal0-font-mono);
+    background: var(--hal0-bg-2);
+    border: 1px solid var(--hal0-border);
+    color: var(--hal0-fg-dim);
+  }
+}
+
+// ─── login / signup — modal AND full-page share this partial ───────────
+// forum.hal0.dev currently serves login as a full page
+// (.login-fullpage), not a modal, but the same classes
+// (.login-welcome-header, .input-group, .btn-social) render inside
+// .d-modal for sites with login_required off, so styling the shared
+// selectors covers both without guessing at modal-only markup.
+.login-welcome-header .login-title,
+.signup-page .login-title {
+  font-family: var(--hal0-font-mono);
+  font-weight: 500;
+  letter-spacing: var(--hal0-ls-title);
+}
+.login-fullpage .input-group input,
+.signup-fullpage .input-group input,
+.d-modal .input-group input {
+  border-radius: var(--hal0-rad-sm);
+  font-family: var(--hal0-font-mono);
+  font-size: 13px;
+}
+.login-fullpage .btn-social,
+.signup-fullpage .btn-social,
+.d-modal .btn-social {
+  border-radius: var(--hal0-rad-sm);
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+}
+.login-fullpage #email-login-link,
+.login-fullpage #forgot-password-link,
+.login-fullpage .login__password-links a,
+.signup-fullpage .login-page-cta__existing-account a {
+  color: var(--hal0-fg-dim);
+}
+.login-fullpage #email-login-link:hover,
+.login-fullpage #forgot-password-link:hover {
+  color: var(--hal0-accent);
+}
+
+// ─── floating menus ──────────────────────────────────────────────────────
+// User menu, hamburger/sidebar "More" panel, notifications, post-menu
+// popovers (.fk-d-menu) and generic dropdowns (.dropdown-menu). These are
+// genuinely floating layers, so — unlike cards — they keep a shadow
+// (already bridged to --hal0-shadow-menu on --shadow-dropdown).
+.menu-panel,
+.menu-panel.drop-down,
+.fk-d-menu__inner-content {
+  border-radius: var(--hal0-rad);
+}
+// .menu-panel.slide-in (mobile hamburger/user-menu drawer) reads full
+// height off the viewport edge — a radius there would clip against the
+// screen edge it's flush with, so it's excluded from the rule above.
+.menu-panel.slide-in {
+  border-radius: 0;
+}
+
+.dropdown-menu__subheader {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  text-transform: lowercase;
+  letter-spacing: var(--hal0-ls-label);
+  color: var(--hal0-fg-dim);
+}
+.dropdown-menu__divider {
+  background: var(--hal0-border-soft);
+}
+
+// Hamburger category/link rows (menu-panel.scss's .widget-link /
+// .categories-link / li.category-link) — identifiers, so mono.
+.menu-panel .widget-link,
+.menu-panel .categories-link,
+.menu-panel li.category-link .category-name {
+  font-family: var(--hal0-font-mono);
+  font-size: 12.5px;
+}
+.menu-panel .widget-link:hover,
+.menu-panel .categories-link:hover {
+  background: var(--hal0-bg-2);
+}
+
+// User-menu / notifications list rows — item title stays Geist (it's a
+// notification sentence, not an identifier), but the timestamp and
+// username reference read as metrics.
+.user-menu .quick-access-panel .relative-date,
+.user-notifications-list .relative-date {
+  font-family: var(--hal0-font-mono);
+  font-size: 10.5px;
+  color: var(--hal0-fg-faint);
+}
+.user-menu .quick-access-panel li:hover,
+.user-notifications-list li:hover {
+  background: var(--hal0-bg-2);
+}
+
+// Post-menu popovers and the "who liked this" / reaction picker share the
+// same .fk-d-menu shell handled above; nothing post-specific left to set
+// beyond what the shared rule already covers.
+
+// ─── toasts / notices ────────────────────────────────────────────────────
+.fk-d-toasts .fk-d-toast {
+  border-radius: var(--hal0-rad);
+}
+.fk-d-default-toast__title {
+  font-family: var(--hal0-font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: var(--hal0-ls-tight);
+}
+.fk-d-default-toast__message {
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+
+// .global-notice (site-wide banners, e.g. a maintenance notice) wraps an
+// .alert — both get the same tonal-border treatment as the comp's
+// .banner, without the icon well/eyebrow the comp draws (that's markup
+// this theme doesn't own).
+.alert {
+  border-radius: var(--hal0-rad);
+  border: 1px solid var(--hal0-border);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.alert.alert-success {
+  border-color: var(--hal0-ok-line);
+}
+.alert.alert-error {
+  border-color: var(--hal0-err-line);
+}
+.alert.alert-warning {
+  border-color: var(--hal0-warn-line);
+}
+.alert.alert-info {
+  border-color: var(--hal0-info-line);
+}
+
+// ─── user cards / group cards ───────────────────────────────────────────
+// Genuinely a card (not a floating layer) once summoned — flat, hairline,
+// no shadow, matching the comp's .card spec exactly. Core sets its own
+// radius with `!important` (user-card.scss), so a plain border-radius
+// here is silently defeated — set the variable it actually reads instead
+// (the "prefer a variable over out-specifying a core selector" rule).
+.user-card,
+.group-card {
+  --d-border-radius: var(--hal0-rad-lg);
+  border: 1px solid var(--hal0-border);
+}
+.user-card .names__primary,
+.group-card .names__primary {
+  font-family: var(--hal0-font-mono);
+  font-weight: 600;
+  letter-spacing: var(--hal0-ls-tight);
+}
+.user-card .names__secondary,
+.group-card .names__secondary {
+  font-family: var(--hal0-font-mono);
+  font-size: 12.5px;
+  color: var(--hal0-fg-dim);
+}
+.user-card .metadata,
+.group-card .metadata {
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  color: var(--hal0-fg-dim);
+}
+.user-card .metadata.email,
+.user-card .desc,
+.group-card .desc {
+  color: var(--hal0-fg-muted);
+}
+.user-card .bio a:not(.mention),
+.group-card .bio a:not(.mention) {
+  color: var(--hal0-accent);
+}
+// Badges inside the card read as identifier chips, same shape as the
+// topic-list tag chip in _hal0-discourse.scss.
+.user-card .badge-section .user-badge {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  border-radius: 3px;
+  background: var(--hal0-bg-2);
+  border-color: var(--hal0-border);
+}
+.user-card .location-and-website .d-icon,
+.user-card .user-status .d-icon {
+  color: var(--hal0-fg-faint);
+}
+
+// ─── search — header dropdown panel ─────────────────────────────────────
+// .search-menu-panel's box (bg + border) is already set in
+// _hal0-discourse.scss alongside the shared search-input rules — this
+// only adds the results list inside it, so it's additive rather than a
+// second declaration of the same box.
+.search-menu .results .heading h4,
+.search-menu-panel .results .heading h4 {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: lowercase;
+  letter-spacing: var(--hal0-ls-label);
+  color: var(--hal0-fg-dim);
+}
+.search-menu .search-link,
+.search-menu-panel .search-link {
+  font-family: var(--hal0-font-mono);
+  font-size: 12.5px;
+}
+.search-menu .search-link:hover,
+.search-menu .search-link:focus,
+.search-menu-panel .search-link:hover,
+.search-menu-panel .search-link:focus {
+  background: var(--hal0-bg-2);
+}
+.search-menu .search-result-topic .topic-title,
+.search-menu-panel .topic-title {
+  font-family: var(--hal0-font-body);
+  color: var(--hal0-fg);
+}
+.search-menu .search-item-slug .keyword,
+.search-menu-panel .search-item-slug .keyword {
+  color: var(--hal0-accent);
+}
+.search-random-quick-tip .tip-label {
+  font-family: var(--hal0-font-mono);
+  border-radius: 3px;
+}
+
+// ─── search — full page (/search) ───────────────────────────────────────
+// Previously out of scope (see README) — the operator asked for it in
+// this sweep. Discourse renders this as .search-container, not
+// .hal0-chrome, so it reads the --hal0-* tokens directly like every
+// other Discourse-native surface in _hal0-discourse.scss.
+.search-container .search-page-heading {
+  font-family: var(--hal0-font-mono);
+  font-weight: 500;
+  letter-spacing: var(--hal0-ls-title);
+}
+.search-container .search-page-heading span.term {
+  background: var(--hal0-accent-soft);
+  color: var(--hal0-accent);
+}
+.search-container .search-info {
+  border-top-color: var(--hal0-border);
+}
+.search-container .search-notice .fps-invalid {
+  border-radius: var(--hal0-rad-sm);
+  background: var(--hal0-err-soft);
+  border: 1px solid var(--hal0-err-line);
+  color: var(--hal0-err);
+}
+.search-container .search-advanced-filters {
+  border-radius: var(--hal0-rad-lg);
+  border-color: var(--hal0-border);
+}
+
+// Result rows — same title/blurb/tag idiom as the topic list in
+// _hal0-discourse.scss, adapted to the .fps-result row shape.
+.fps-result {
+  border-bottom: 1px solid var(--hal0-border-soft);
+  padding-bottom: 20px;
+}
+.fps-result .search-link .topic-title {
+  font-size: 14.5px;
+  line-height: 1.35;
+  color: var(--hal0-fg);
+}
+.fps-result .blurb {
+  color: var(--hal0-fg-dim);
+  font-size: 13px;
+}
+.fps-result .blurb .date,
+.fps-result .blurb .search-highlight {
+  color: var(--hal0-fg);
+}
+.fps-result .discourse-tag.simple {
+  color: var(--hal0-fg-faint);
+}
+.search-results .fps-user-item .user-titles .name {
+  font-family: var(--hal0-font-mono);
+  color: var(--hal0-fg);
+}
+.search-results .fps-user-item .user-titles .username {
+  font-family: var(--hal0-font-mono);
+  color: var(--hal0-fg-dim);
+}
