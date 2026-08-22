@@ -1,0 +1,337 @@
+// hal0 → docs/KB surfaces restyle.
+//
+// Scope changed mid-build (operator decision): the legacy discourse-docs
+// plugin and discourse-docs-card-filter component are being removed from
+// the forum outright. doc-categories is the only surviving docs plugin —
+// it renders a sidebar panel (reusing Discourse's own sidebar-section
+// components, not bespoke markup) on any topic inside a category that has
+// a doc index configured. The KB / docs browse experience is therefore
+// just the two categories themselves — /c/kb/12 and /c/docs/11 — restyled
+// as category-scoped surfaces, plus that sidebar panel. CSS-only, no
+// template overrides.
+//
+// Every selector below is scoped under one of:
+//   .discourse-docs-sidebar-panel     — the doc-categories sidebar panel
+//   body.category-kb                  — the Knowledge Base category page
+//   body.category-docs                — the Docs category page
+// (both body classes verified from core: ApplicationHelper#body_classes —
+// app/helpers/application_helper.rb — emits `category-#{slug_path}`, and
+// these two top-level categories' slugs are literally `kb` and `docs`.)
+//
+// Source of truth is the comp pack:
+//   hal0-web/docs/design/2026-08-09-community-comps/
+//     04 Blog and KB.html — .kbcat / .surface-tag (KB landing header feel)
+//     08 Docs.html        — .dside (mono label + list sidebar idiom)
+//     hal0-site.css       — .chip, .dtable primitives
+//
+// Plugin/core class (verified from source, not guessed) → design primitive
+//   .discourse-docs-sidebar-panel                  → panel root
+//   .sidebar-panel-header__row (back-to-forum)      → .backlink mono treatment
+//   .sidebar-section-header (real header element —  → .label (uppercase,
+//     see note below on why the wrapper-level rule                          10px, mono)
+//     in _hal0-discourse.scss doesn't reach it)
+//   .sidebar-section-link / .docs-sidebar-nav-link  → .dside a (list row;
+//                                                       active/hover already
+//                                                       inherit the global
+//                                                       --d-sidebar-* bridge)
+//   body.category-kb/.category-docs .category-heading,
+//     .category-title-link .category-name          → KB landing header feel
+//   body.category-kb/.category-docs .topic-list     → .dtable idiom
+//   body.category-kb .category-boxes-with-topics    → .kbcat KB category-card
+//     .category-box / .category-box-inner /            anatomy (icon/accent
+//     .category-box-heading h3 / .featured-topics       hue from the
+//                                                        category's own
+//                                                        color, mono title,
+//                                                        featured topics as
+//                                                        the "first pages"
+//                                                        list, hover filament)
+//
+// Generic comp var names (--bg, --line, --accent, ...) are not aliased
+// here — this file lives outside .hal0-chrome, so it uses the --hal0-*
+// custom properties directly, same convention as _hal0-discourse.scss.
+
+// ─── doc-categories sidebar panel ───────────────────────────────────────
+// doc-categories registers its own sidebar *panel* (SIDEBAR_DOCS_PANEL =
+// "discourse-docs-sidebar") through Discourse's real sidebar-section API —
+// frontend/discourse/app/components/sidebar/api-panels.gjs wraps it as
+// `.sidebar-sections.{key}-panel`, i.e. `.discourse-docs-sidebar-panel`.
+// It reuses core's own section/link components, so most of the shape
+// already comes from the global --d-sidebar-* bridge in
+// _hal0-discourse.scss (active row = accent, hairlines, etc.) — only the
+// docs-panel-specific header treatment needs its own rule here.
+.discourse-docs-sidebar-panel {
+  // Note: _hal0-discourse.scss sets `.sidebar-section-header-wrapper {
+  // text-transform: lowercase }`, but that never actually reaches the
+  // header text — core's own `.sidebar-section-header` (a child of the
+  // wrapper) sets `text-transform: uppercase` directly on itself, and an
+  // element's own declared value always wins over an inherited one,
+  // regardless of ancestor specificity. Target the real element instead so
+  // this rule has an effect: uppercase, mono, 10px — the .label idiom.
+  .sidebar-section-header {
+    font-family: var(--hal0-font-mono);
+    font-size: 10px;
+    letter-spacing: var(--hal0-ls-label);
+    color: var(--hal0-fg-dim);
+  }
+
+  .sidebar-panel-header {
+    border-bottom: 1px solid var(--hal0-border-soft);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-sections__back-to-forum {
+    font-family: var(--hal0-font-mono);
+    font-size: 11.5px;
+    letter-spacing: var(--hal0-ls-tight);
+    color: var(--hal0-fg-dim);
+
+    &:hover {
+      color: var(--hal0-accent);
+    }
+  }
+
+  // Section links — mono list rows, matching 08 Docs.html's .dside a.
+  // Active/hover backgrounds already come from the --d-sidebar-* bridge;
+  // only the typeface needs setting here since .sidebar-wrapper's mono
+  // rule in _hal0-discourse.scss already covers this panel too (kept
+  // explicit for clarity and in case this panel ever renders outside
+  // .sidebar-wrapper).
+  .sidebar-section-link,
+  .docs-sidebar-nav-link {
+    font-family: var(--hal0-font-mono);
+    font-size: 12px;
+    letter-spacing: var(--hal0-ls-tight);
+  }
+}
+
+// ─── shared dtable placeholder ──────────────────────────────────────────
+// One idiom, reused by both category pages below: mono, 40px rows,
+// uppercase 10px headers, right-aligned activity column. Layered on top
+// of the site-wide .topic-list card treatment in _hal0-discourse.scss
+// (border/radius/hover), which still applies underneath.
+%hal0-dtable-topic-list {
+  .topic-list-header .topic-list-data,
+  .topic-list-header th {
+    height: 34px;
+    font-family: var(--hal0-font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: var(--hal0-ls-label);
+  }
+
+  .topic-list-item {
+    > td {
+      height: 40px;
+      padding-top: 0;
+      padding-bottom: 0;
+      font-family: var(--hal0-font-mono);
+      font-size: 12.5px;
+    }
+
+    .link-top-line .title {
+      font-family: var(--hal0-font-mono);
+      font-size: 12.5px;
+      letter-spacing: var(--hal0-ls-tight);
+    }
+  }
+
+  .topic-list-data.activity,
+  td.activity {
+    text-align: right;
+  }
+}
+
+// ─── shared category-header feel ────────────────────────────────────────
+// `.category-heading` / `.category-heading__description` only render when
+// the category has an uploaded logo (frontend/discourse/app/components/
+// discovery/navigation.gjs) — style them defensively so the KB landing
+// header feel is there the moment a logo is configured, without depending
+// on it. `.category-title-link .category-name` always renders (it's the
+// breadcrumb-adjacent category title) and gets the same mono/eyebrow
+// treatment as 04's `.surface-tag` + `.site-h1` pairing regardless.
+@mixin hal0-kb-doc-header {
+  .category-heading {
+    border-bottom: 1px solid var(--hal0-border);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+  .category-heading__badge {
+    font-family: var(--hal0-font-mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: var(--hal0-ls-label);
+    color: var(--hal0-accent);
+  }
+  .category-heading__description {
+    color: var(--hal0-fg-dim);
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 58ch;
+  }
+
+  .category-title-link {
+    .category-name {
+      font-family: var(--hal0-font-mono);
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: var(--hal0-ls-title);
+      color: var(--hal0-fg);
+    }
+  }
+}
+
+// ─── Knowledge Base category (/c/kb/12) ─────────────────────────────────
+body.category-kb {
+  @include hal0-kb-doc-header;
+
+  .topic-list {
+    @extend %hal0-dtable-topic-list;
+  }
+
+  // The six KB areas are subcategories (kb-getting-started, kb-hardware,
+  // kb-runtimes, kb-models, kb-operating, kb-tools — ids 13–18), each with
+  // its own category color, and this category's subcategory_list_style is
+  // boxes_with_featured_topics. Discourse renders that as
+  // frontend/discourse/app/components/categories-boxes-with-topics.gjs —
+  // verified from core source, not guessed:
+  //
+  //   <section class="category-boxes-with-topics with-logos|no-logos">
+  //     <div class="category category-box category-box-{slug}"
+  //          style="--category-badge-color: #{hex}">
+  //       <div class="category-box-inner">
+  //         <div class="category-box-heading">
+  //           <a class="parent-box-link" href="…"><h3>…</h3></a>
+  //         </div>
+  //         <div class="featured-topics">
+  //           <ul><li><svg class="d-icon">…</svg><a class="title">…</a></li></ul>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </section>
+  //
+  // This is the KB category-card anatomy from 04's .kbcat: the category's
+  // own --category-badge-color (already set inline by core, per
+  // categoryColorVariable) becomes the icon/accent hue, title goes mono,
+  // featured topics become the card's "first pages" list, and the card
+  // gets a hairline border + the .pcard 2px hover filament instead of
+  // core's default shadow-free-but-plain box. app/assets/stylesheets/
+  // common/base/category-list.scss already aliases
+  // --d-category-box-background-color to --hal0-bg-elevated site-wide
+  // (see _hal0-discourse.scss) — that part needs no repeating here.
+  .category-boxes-with-topics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+
+  .category-boxes-with-topics .category-box {
+    position: relative;
+    overflow: hidden;
+    border-left-width: 3px;
+    border-radius: var(--hal0-rad-lg);
+    transition: border-color var(--hal0-dur-fast) var(--hal0-ease);
+
+    // The filament — same gradient recipe as .pcard::after / the header,
+    // tinted through this category's own accent color where the design
+    // uses --accent, so each KB area's card brightens in its own hue.
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--hal0-border) 18%,
+        color-mix(
+          in srgb,
+          var(--category-badge-color, var(--hal0-accent)) 65%,
+          var(--hal0-border)
+        )
+          50%,
+        var(--hal0-border) 82%,
+        transparent
+      );
+      opacity: 0.5;
+      transition: opacity var(--hal0-dur-fast) var(--hal0-ease);
+    }
+
+    &:hover {
+      border-left-color: var(--category-badge-color, var(--hal0-accent));
+
+      &::after {
+        opacity: 1;
+      }
+    }
+  }
+
+  .category-boxes-with-topics .category-box-inner {
+    border-color: var(--hal0-border);
+    padding: 18px 20px 16px;
+  }
+
+  .category-boxes-with-topics .category-box-heading {
+    margin-bottom: 12px;
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--hal0-font-mono);
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: var(--hal0-ls-tight);
+      text-align: left;
+
+      // The category icon (CategoryTitleBefore), when set — the design's
+      // "icon carries the accent hue" — tinted with this card's own color.
+      .d-icon {
+        color: var(--category-badge-color, var(--hal0-accent));
+      }
+    }
+  }
+
+  // Featured topics — the card's "first pages" list, matching .kbcat ul li.
+  .category-boxes-with-topics .featured-topics {
+    margin-bottom: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--hal0-border-soft);
+
+    ul {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    li {
+      padding: 0;
+      font-family: var(--hal0-font-mono);
+      font-size: 11.5px;
+      color: var(--hal0-fg-dim);
+
+      .d-icon {
+        color: var(--hal0-fg-faint);
+      }
+
+      a.title {
+        color: var(--hal0-fg-dim);
+
+        &:hover {
+          color: var(--hal0-accent);
+        }
+      }
+    }
+  }
+}
+
+// ─── Docs category (/c/docs/11) ─────────────────────────────────────────
+body.category-docs {
+  @include hal0-kb-doc-header;
+
+  .topic-list {
+    @extend %hal0-dtable-topic-list;
+  }
+}
