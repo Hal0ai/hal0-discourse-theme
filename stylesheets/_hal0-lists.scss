@@ -1,0 +1,335 @@
+// hal0 → Discourse list-surface restyle: categories index, category pages,
+// tag pages, and the chrome around any topic list (pagination/footer/empty
+// states).
+//
+// This file is a sibling of _hal0-discourse.scss (topic list rows, tags,
+// nav pills, sidebar, welcome banner — read that file first, do not
+// duplicate what it already covers) and _hal0-docs.scss (the KB/Docs
+// category surfaces — body.category-kb / body.category-docs are that
+// agent's, left alone here even where a selector below would otherwise
+// match them structurally the same way).
+//
+// Source of truth is the comp pack:
+//   hal0-web/docs/design/2026-08-09-community-comps/
+//     07 Forum.html   — .cindex / .crow / .cathead / .catstats / .fbar (dark
+//                        CSS block near the top of the file)
+//     hal0-site.css   — .fpill, .dsel, .dtable
+//
+// Comp class          → Discourse class
+//   .cindex            → .categories-and-latest (the two-column /categories
+//                         layout: `.column.categories` + `.column` "latest")
+//   .crow               → .category-list tbody tr (the rail itself is
+//                         already narrowed to 4px in _hal0-discourse.scss —
+//                         this file only adds the row's typography)
+//   .crow .cnt           → td.topics .value / .unit
+//   .crow .cnt .new       → .category__badges .badge.new-posts
+//   .crow .subs .sub      → .subcategories .subcategory
+//   .lrow                → .latest-topic-list-item
+//   .cathead / .bar / h1  → .category-heading (rail is the same
+//                          --category-badge-color custom property Discourse
+//                          already publishes inline on the section, not a
+//                          brand override) + .category-heading__content
+//                          .badge-category__wrapper (the title — Discourse
+//                          renders the coloured badge itself as the "h1",
+//                          there is no separate plain-text heading)
+//   .catstats            → .category-heading has no stats row in current
+//                          core (see note below) — not present to style
+//   .dtable (tag counts)  → .tags-list .tag-box .tag-count
+//
+// Generic token names are not used here — everything reads --hal0-* directly,
+// same convention as _hal0-discourse.scss.
+
+// ─── categories index: table headers ────────────────────────────────────
+// Same mono/label treatment topic-list-header already gets in
+// _hal0-discourse.scss; .category-list-header is a distinct core class
+// (categories-topic-list.scss / category-list.scss), not covered by that
+// selector, so it needs its own copy of the same look rather than an
+// inherited one.
+.category-list-header th {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--hal0-ls-label);
+  color: var(--hal0-fg-dim);
+}
+
+// ─── categories index: category rows ────────────────────────────────────
+// The 4px rail itself is already handled in _hal0-discourse.scss
+// (`.category-list tbody .category { border-left-width: 4px }`, reusing
+// core's own `--category-badge-color` var) — this only adds the title/desc
+// typography the comp's .crow specs beyond what that file's generic
+// .category-list-item.category-name rule covers for the box/latest variants.
+.category-list td.category h3 {
+  font-weight: 400;
+}
+.category-list .category-description {
+  font-size: 13px;
+  line-height: 1.55;
+  max-width: 52ch;
+}
+
+// Topic count: comp's mono number + faint unit, tabular so a column of
+// counts lines up.
+.category-list td.topics .value {
+  font-family: var(--hal0-font-mono);
+  font-size: 15.5px;
+  font-weight: 400;
+  color: var(--hal0-fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+.category-list td.topics .unit {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  color: var(--hal0-fg-faint);
+}
+// "N new" — comp reads this as plain amber text under the count, not a
+// filled pill (the filled-pill treatment in _hal0-discourse.scss is
+// reserved for the topic-list's own per-row unread badge). Different core
+// class (.new-posts, not .unread-posts/.new-topic) so it doesn't collide
+// with that rule.
+.category-list td.topics .category__badges .badge.new-posts {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--hal0-font-mono);
+  font-size: 10.5px;
+  color: var(--hal0-accent);
+  background: none;
+  padding: 0;
+}
+
+// Subcategory row: small colour dot + mono name, matching the comp's .sub.
+.category-list .subcategories .subcategory {
+  font-family: var(--hal0-font-mono);
+  font-size: 11px;
+  color: var(--hal0-fg-dim);
+}
+.category-list .subcategories .subcategory .badge-category__wrapper .badge-category {
+  font-size: 11px;
+}
+
+// ─── categories index: "latest" column ──────────────────────────────────
+// Core renders this as its own list, not a reuse of .topic-list, so it
+// needs the same card frame that .topic-list / .category-list get in
+// _hal0-discourse.scss rather than inheriting it.
+.latest-topic-list {
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad-lg);
+  background: var(--hal0-bg-elevated);
+  overflow: hidden;
+}
+.latest-topic-list .table-heading {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--hal0-ls-label);
+  color: var(--hal0-fg-dim);
+  border-bottom: 1px solid var(--hal0-border);
+}
+.latest-topic-list-item {
+  border-bottom: 1px solid var(--hal0-border-soft);
+}
+.latest-topic-list-item:last-child {
+  border-bottom: 0;
+}
+.latest-topic-list-item:hover {
+  background: var(--hal0-bg-2);
+}
+.latest-topic-list-item .main-link a.title {
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--hal0-fg-muted);
+  padding: 0;
+}
+.latest-topic-list-item:hover .main-link a.title {
+  color: var(--hal0-accent);
+}
+.latest-topic-list-item .topic-poster .avatar {
+  border-radius: var(--hal0-rad-sm);
+}
+.latest-topic-list-item .topic-stats {
+  color: var(--hal0-fg-dim);
+}
+.latest-topic-list-item .topic-stats .badge-posts .number {
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--hal0-fg-dim);
+}
+.latest-topic-list-item .topic-last-activity {
+  font-family: var(--hal0-font-mono);
+  font-size: 10.5px;
+  color: var(--hal0-fg-faint);
+}
+// Empty/loading states for this column — same mono-label + muted-body voice
+// as the .empty-state rules below.
+.latest-topic-list .no-topics,
+.latest-topic-list .more-topics {
+  font-family: var(--hal0-font-mono);
+  font-size: 11.5px;
+  color: var(--hal0-fg-dim);
+  padding: 12px 14px;
+}
+
+// ─── category_style: box (site-wide, not the KB grid) ──────────────────
+// _hal0-docs.scss already owns `.category-boxes-with-topics` (the KB's
+// six-subcategory grid). `.category-boxes` without `-with-topics` is core's
+// generic box layout, available to any category via the `category_style`
+// site setting — distinct component, same generic border/background
+// bridge _hal0-discourse.scss already set up
+// (`--d-category-box-background-color`, `.category-box-inner` border), just
+// missing the mono/prose split for its own title and description.
+.category-boxes h3 {
+  font-family: var(--hal0-font-mono);
+  letter-spacing: var(--hal0-ls-tight);
+  color: var(--hal0-fg);
+}
+.category-boxes .description {
+  color: var(--hal0-fg-dim);
+}
+
+// ─── category page: header ──────────────────────────────────────────────
+// `.discovery-heading` is core's shared banner base for both
+// `.category-heading` and `.tag-info` (base/_topic-list.scss's own comment
+// says as much) — set through its variables so both surfaces track this
+// theme's frame without a second copy of the rule for the tag page.
+:root {
+  --category-header-border: 1px solid var(--hal0-border);
+  --discovery-heading-description-color: var(--hal0-fg-dim);
+}
+// The comp's 4px colour rail on the category header. Discourse doesn't draw
+// one here itself, but it already publishes the category's colour as
+// `--category-badge-color` inline on this exact element (see the categories
+// index rail in _hal0-discourse.scss) — reuse that custom property rather
+// than hand-picking a colour, so an edited category colour still tracks.
+//
+// Guarded with :has(__description) — core still mounts an empty
+// `<section class="category-heading">` (no children beyond HTML comments)
+// on every category that has no about-topic body set, which is most of
+// them on this forum. Without the guard the border-left + padding drew a
+// visible amber sliver box with nothing in it on every such category page
+// (caught in the harness screenshot against /c/docs, a category owned by
+// the docs agent and otherwise untouched by this file).
+.category-heading:has(.category-heading__description) {
+  border-left: 4px solid var(--category-badge-color, var(--hal0-border-strong));
+  border-radius: 0 var(--hal0-rad) var(--hal0-rad) 0;
+  padding-left: 16px;
+  background: var(--hal0-bg-elevated);
+}
+// No separate rule needed for .category-heading__description — core reads
+// it straight from `--discovery-heading-description-color` above.
+
+// The category title: Discourse renders the coloured category badge itself
+// as the page heading (no separate plain-text h1 to target), sized up via
+// `.category-heading__content .badge-category__wrapper` — bring the name to
+// the comp's mono display treatment at that larger size.
+.category-heading__content .badge-category__wrapper .badge-category__name {
+  font-family: var(--hal0-font-mono);
+  letter-spacing: var(--hal0-ls-title);
+  font-weight: 500;
+  color: var(--hal0-fg);
+}
+// NB: core's .category-heading has no topic-count/reply-count stats row
+// (the comp's .catstats) — nothing to theme there, it simply isn't rendered
+// by this Discourse version. Left alone rather than fabricated.
+
+// Tag filter row: the comp's CategoryView renders per-tag .fpill chips
+// under the category header. Current Discourse core does not render an
+// equivalent standalone component on `/c/<slug>` — only the `.tag-drop`
+// select-kit dropdown in the breadcrumb (select-kit is a sibling agent's
+// surface) and the `.nav.nav-pills` latest/new/hot tabs already styled in
+// _hal0-discourse.scss. Nothing else to target here in CSS alone; see the
+// report for detail instead of guessing at markup that isn't there.
+
+// ─── tag pages: /tags index ─────────────────────────────────────────────
+.tags-list h3 {
+  font-family: var(--hal0-font-mono);
+  font-size: 12.5px;
+  text-transform: lowercase;
+  letter-spacing: var(--hal0-ls-tight);
+  color: var(--hal0-fg-dim);
+}
+.tags-list .tag-box {
+  margin-bottom: 10px;
+}
+// Per-tag topic count. Left `.discourse-tag` itself untouched — its
+// font-size/radius/background are the `--d-tag-*` trio, owned by the
+// sibling covering tags/buttons; this only styles the count that core
+// renders as a plain sibling span next to it.
+.tags-list .tag-box .tag-count {
+  font-family: var(--hal0-font-mono);
+  color: var(--hal0-fg-faint);
+  margin-left: 3px;
+}
+.tag-sort-options {
+  font-family: var(--hal0-font-mono);
+  font-size: 11px;
+  color: var(--hal0-fg-dim);
+}
+.tag-sort-options a {
+  color: inherit;
+  text-decoration: none;
+}
+.tag-sort-options span.active a {
+  color: var(--hal0-accent);
+  font-weight: 500;
+}
+
+// ─── tag pages: /tag/<name> header ───────────────────────────────────────
+// Shares `.discovery-heading` with `.category-heading` above (border,
+// radius, padding, description colour all come from the same three
+// variables) — this only adds what's specific to the tag variant: the tag
+// name itself and its "used in n categories" association row.
+.tag-info .tag-name-wrapper .discourse-tag {
+  font-family: var(--hal0-font-mono);
+  letter-spacing: var(--hal0-ls-title);
+}
+// .tag-description-wrapper needs no rule of its own — `section.tag-info`
+// sets `color: var(--discovery-heading-description-color)` and this
+// inherits it.
+.tag-info .tag-associations .badge-category__wrapper .badge-category {
+  font-size: 11px;
+}
+
+// ─── list chrome: infinite-scroll footer, pagination, dismiss ──────────
+.topic-list-bottom {
+  border-top: 1px solid var(--hal0-border-soft);
+  padding-top: 12px;
+}
+.dismiss-container-top,
+.dismiss-container-bottom {
+  gap: 8px;
+}
+
+// Empty states — core's generic `.empty-state` component, used for both a
+// genuinely empty list and a filtered-to-nothing one
+// (`--empty-topic-filter`). No literal `.education`/`.no-topics` class
+// exists in current core to hang a rule on; this is the real equivalent.
+.empty-state__title {
+  font-family: var(--hal0-font-mono);
+  font-size: 13px;
+  color: var(--hal0-fg);
+}
+.empty-state__body {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--hal0-fg-dim);
+}
+.empty-state__tip {
+  font-family: var(--hal0-font-mono);
+  font-size: 11px;
+  color: var(--hal0-fg-faint);
+}
+
+// ─── user directory (/u) ─────────────────────────────────────────────────
+// Deliberately not themed: with only an admin API key and no seeded users,
+// `/u` renders core's `.empty-state` ("Admins and moderators can see and
+// manage users in User Admin") rather than the `.directory-table` grid this
+// theme would otherwise style to the .dtable idiom (mono 12.5px, 40px rows,
+// uppercase 10px headers, numeric columns right-aligned, row hover --bg-2).
+// The empty-state typography above already covers what actually renders;
+// styling `.directory-table` blind, with no live markup to verify against,
+// would be exactly the kind of guess the harness exists to prevent. Flagged
+// in the report as a follow-up once the forum has real member data to
+// render the table against.
