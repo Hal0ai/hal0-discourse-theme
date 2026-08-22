@@ -17,6 +17,22 @@ const FOOTER_VERSION = "1.0.0-rc.3";
  * surface (see SiteFooter.astro). Injected via `below-footer` so it sits
  * after Discourse's own footer content, closing out the page the same way
  * hal0.dev does.
+ *
+ * Do NOT gate this on Discourse's own footer visibility. Core's
+ * `below-footer` outlet (application.gjs) renders unconditionally; it is
+ * Discourse's OWN footer content — `<PoweredByDiscourse />` and the custom
+ * "footer" HTML block — that is conditional, on `@controller.showFooter`,
+ * which reads the `footer` service's hider registry. `discovery/topics.gjs`
+ * (the component behind `/`, `/latest`, `/top`, `/new`) holds a hider open
+ * via `{{hideApplicationFooter}}` for as long as the topic list has more
+ * pages to infinite-scroll; none of the six `/categories` display
+ * components ever call that helper, so `/categories` shows its footer
+ * immediately while `/` can sit with showFooter=false for a while. This
+ * component has no route/service dependency at all (unlike hal0-nav.gjs /
+ * hal0-subnav.gjs, which inject `@service router`) — it should render
+ * identically regardless of that state, and the CSS in common.scss
+ * (`.hal0-chrome.ftr`) is written to not assume a preceding native-footer
+ * sibling supplies its box/spacing.
  */
 export default class Hal0Footer extends Component {
   wordmark = htmlSafe(HAL0_WORDMARK_SVG);
