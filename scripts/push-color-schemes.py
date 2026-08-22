@@ -1,24 +1,29 @@
 #!/usr/bin/env python3
 """
-Push this component's colour schemes into a Discourse instance.
+Push this theme's colour schemes into a Discourse instance.
 
 Why this exists
----------------
-`about.json` declares "hal0 dark" and "hal0 light", but Discourse **ignores
-colour schemes shipped by a theme component**. From core's
-`app/models/remote_theme.rb`:
+----------------
+FALLBACK, not a required step, since this repo graduated from a theme
+component to a full theme (about.json's `component: false`). A full theme's
+`color_schemes` install natively on a fresh git-repo install — Discourse
+only skips that for components. From core's `app/models/remote_theme.rb`:
 
     update_theme_color_schemes(theme, theme_info["color_schemes"]) unless theme.component
 
-Only full themes get their schemes installed. This component deliberately
-stays a component (it has to attach to whatever base theme the forum runs),
-so the schemes have to be created through the admin API instead.
+Back when this repo *was* a component (component: true, pre-graduation),
+that line meant `about.json`'s schemes were silently ignored and this script
+was the only way to get them into Discourse at all. As a theme, a fresh
+install doesn't need this script for that. What it's still useful for:
+re-pushing `about.json`'s current colours through the admin API without a
+full reinstall, any time those hex values change after the theme is already
+installed and running (Discourse doesn't re-read about.json's colours on a
+routine "check for updates" sync — see the README's Install section).
 
-That would normally mean the palette lives in the site database rather than
-in git, which is exactly the drift the design brief warns about. This script
-closes that hole: `about.json` stays the single source of truth, and running
-this pushes it at the instance. Re-run it whenever about.json's colours
-change.
+This also means the palette can drift into the site database independently
+of git if someone edits a colour scheme by hand in Admin → Appearance. This
+script pushes `about.json` at the instance and overwrites that drift; re-run
+it whenever about.json's colours change and you don't want to reinstall.
 
 Usage
 -----

@@ -1,11 +1,17 @@
 # hal0-discourse-theme
 
-A Discourse **theme component** (not a full theme — installs alongside
-whatever base theme `forum.hal0.dev` runs) that carries the hal0 brand into
-Discourse: dark/light color schemes built from hal0's design tokens, and
-chrome injected into Discourse's own header and footer — the wordmark, the
-hal0 nav, a sub-nav, and the shared site footer — so the forum reads as part
-of hal0.dev rather than a bolted-on subdomain.
+A Discourse **theme** (installed directly, not layered as a component onto
+some other base theme) that carries the hal0 brand into Discourse: dark/light
+color schemes built from hal0's design tokens, and chrome injected into
+Discourse's own header and footer — the wordmark, the hal0 nav, a sub-nav,
+and the shared site footer — so the forum reads as part of hal0.dev rather
+than a bolted-on subdomain.
+
+Was a theme *component* through rc.3 (see git history); graduated to a full
+theme so `about.json`'s `color_schemes` install natively and the brand
+tokens can be wired to Discourse's own light/dark toggle instead of the
+visitor's OS preference — see [Install](#install) and
+[Syncing from hal0-web](#syncing-from-hal0-web) for what that changed.
 
 Design source: `hal0-web/docs/design/2026-08-09-community-comps/`
 (`README.md` "The unified chrome" + screen 7 "Forum", `07 Forum.html`,
@@ -15,16 +21,22 @@ hand-forked — see [Syncing from hal0-web](#syncing-from-hal0-web).
 ## What's in the box
 
 ```
-about.json                                    theme metadata + hal0 dark/light color schemes
+about.json                                    theme metadata + hal0 dark/light color schemes +
+                                               the only_theme_color_schemes modifier
 settings.yml                                  hal0_web_origin, show_hal0_chrome
 common/
   common.scss                                 entry point: token import, Discourse var bridge,
                                                .hal0-chrome scoped CSS (ported from hal0-site.css)
+  color_definitions.scss                      AUTO-GENERATED — the --hal0-* tokens that differ
+                                               between light/dark, compiled once per Discourse
+                                               ColorScheme. Must live here, at exactly this path —
+                                               see its header and "Syncing from hal0-web" below.
 stylesheets/
   _hal0-discourse.scss                        Discourse-surface restyle: topic list, tags, category
                                                badges/page, nav pills, accepted answer, role chips,
                                                sidebar, welcome banner, header/banner search
-  _hal0-tokens.scss                           AUTO-GENERATED — brand tokens as CSS custom properties.
+  _hal0-tokens.scss                           AUTO-GENERATED — the --hal0-* tokens that are
+                                               identical in both schemes (fonts, radii, motion).
                                                Must live here, not in common/: Discourse compiles
                                                common/common.scss as an entrypoint and resolves
                                                @import partials out of stylesheets/.
@@ -41,9 +53,12 @@ javascripts/discourse/
 connectors-classic/                           reference-only classic Handlebars connector (NOT loaded)
   below-footer/hal0-footer.hbs
 scripts/
-  sync-from-hal0-web.mjs                      regenerates the two AUTO-GENERATED files above
-  push-color-schemes.py                       installs about.json's colour schemes through the
-                                               admin API (components can't ship them natively)
+  sync-from-hal0-web.mjs                      regenerates the three AUTO-GENERATED files above
+  push-color-schemes.py                       FALLBACK — re-syncs about.json's colour schemes
+                                               through the admin API without a full reinstall (see
+                                               Install below for why a component-era install needs
+                                               a real reinstall, not this script, to pick up
+                                               component: false)
   push-content-model.py                       tag groups, form templates and their category
                                                assignments — the forum's structured post types
 LICENSE                                       Apache-2.0, matching the hal0 project
@@ -57,31 +72,44 @@ Discourse admin → **Customize → Themes → Install → From a git repository
 https://github.com/Hal0ai/hal0-discourse-theme
 ```
 
-Install it as a **component**, then add it to whatever theme is active on
-`forum.hal0.dev` (Themes → your active theme → Components → add "hal0 forum
-theme").
+Install it as a **theme** — leave "component" unchecked (it's the installer
+default for a `component: false` about.json, but double-check: the installer
+UI's checkbox reflects what it read from the repo, this isn't something you
+choose independently). Then make it the site's active theme, or add it to
+the theme selector as one of the choices, per how `forum.hal0.dev` wants to
+run themes.
 
-Then push the colour schemes — **this step is not optional and is not done
-for you**:
+`about.json`'s `color_schemes` install **natively** now, no follow-up script
+required for a fresh install. The `modifiers.only_theme_color_schemes: true`
+flag (see `about.json`) tells Discourse's installer to auto-wire *both*
+palette slots from the declared schemes on first install — light from
+whichever scheme isn't dark, dark from whichever is — see
+`app/models/remote_theme.rb`'s `only_theme_color_schemes` branch. Without
+that flag a fresh install only wires the light slot and leaves dark to be
+set by hand (Admin → Appearance → Themes → this theme → "Dark Color
+Palette").
 
-```bash
-python3 scripts/push-color-schemes.py          # add --dry-run first to preview
-```
+**If you're migrating this specific theme from its old component-era
+install on `forum.hal0.dev`: merging this PR and letting Discourse "check
+for updates" is *not* enough.** Read from `RemoteTheme.update_from_remote`:
+the `component` attribute is only re-read from `about.json` on the code path
+used for a *brand-new* theme record (`existing == false`, or the narrow
+`!local_version` placeholder-sync branch right after creation) — a routine
+remote-theme sync on an already-installed theme does not re-derive
+`component` from the updated about.json at all. **Remove the existing
+component from the active theme's Components list, then reinstall this repo
+from scratch as a theme** (same git-repo install flow above) for
+`component: false` to actually take effect. That reinstall also loses the
+`hal0_web_origin` / `show_hal0_chrome` setting values and detaches it from
+whatever theme it was a component of — note both down before removing the
+old install.
 
-Discourse **ignores `color_schemes` declared by a theme component**. Core's
-`app/models/remote_theme.rb` guards the import with:
-
-```ruby
-update_theme_color_schemes(theme, theme_info["color_schemes"]) unless theme.component
-```
-
-So installing this component gets you the chrome and the `--hal0-*` tokens,
-but leaves Discourse's own palette (topic rows, buttons, badges, links) on
-whatever the base theme shipped — stock light, in practice. The script
-creates "hal0 dark" and "hal0 light" from `about.json` through the admin API
-and points the base theme's two palette slots at them, so `about.json` stays
-the single source of truth and the palette does not quietly drift into the
-site database. Re-run it whenever `about.json`'s colours change.
+`scripts/push-color-schemes.py` is now a **fallback**, not a required step:
+use it if `about.json`'s colours change later and you'd rather re-push the
+two schemes through the admin API than do a full reinstall. It still works
+unchanged — themes accept `color_schemes` pushes the same way components do,
+this was never a component-only limitation, only *installer-time* import
+was.
 
 Credentials come from `/srv/secrets/discourse-api.env` on the forum host, or
 from `DISCOURSE_URL` / `DISCOURSE_API_KEY` / `DISCOURSE_API_USERNAME` in the
@@ -93,7 +121,7 @@ Two theme settings (Customize → Themes → hal0 forum theme → Settings):
   nav links (default `https://hal0.dev`). Only change this for a staging
   hal0-web deployment.
 - `show_hal0_chrome` — master on/off switch for both connectors. Useful for
-  isolating a style conflict without uninstalling the component.
+  isolating a style conflict without uninstalling the theme.
 
 ## How the header actually attaches
 
@@ -170,13 +198,23 @@ files, and hand-port the wordmark/icon markup from `hal0-wordmark.js` /
 
 ## Syncing from hal0-web
 
-`scripts/sync-from-hal0-web.mjs` regenerates two files from a hal0-web
+`scripts/sync-from-hal0-web.mjs` regenerates three files from a hal0-web
 checkout so tokens and nav links are never hand-typed twice:
 
 | Generated file | Source |
 |---|---|
-| `stylesheets/_hal0-tokens.scss` | `src/styles/tokens.css` (`:root` + `[data-theme='light']` blocks) |
+| `stylesheets/_hal0-tokens.scss` | `src/styles/tokens.css` tokens with **no** light override — identical in both schemes (fonts, radii, letter-spacing, motion, shadows) |
+| `common/color_definitions.scss` | `src/styles/tokens.css` tokens that **do** have a `[data-theme='light']` override — resolved per Discourse ColorScheme via `dark-light-choose()` (see that file's header) |
 | `javascripts/discourse/lib/hal0-nav-data.js` | `src/data/nav.json` (`header`, `footerColumns`, `social`, `footerBase`) |
+
+The tokens.css → SCSS split is structural, not a style choice: `common.scss`
+(which pulls in `_hal0-tokens.scss`) compiles **once**, so a token that needs
+to differ between light and dark can't live there — it has to be in
+`color_definitions.scss`, which Discourse compiles once per `ColorScheme` row
+and can therefore resolve differently per scheme. The script partitions on
+tokens.css's own `:root` vs `[data-theme='light']` structure, so a token
+gains or loses a light override in hal0-web and lands in the right file here
+automatically next run — nothing to remember on this side.
 
 ```bash
 # explicit path
@@ -189,9 +227,10 @@ HAL0_WEB_DIR=/mnt/mintdev/repos/hal0-web node scripts/sync-from-hal0-web.mjs
 node scripts/sync-from-hal0-web.mjs
 ```
 
-Both generated files start with an `AUTO-GENERATED` banner — don't hand-edit
-them; edit `hal0-web`'s source files and re-run the script instead. Run it
-and commit the diff whenever hal0-web's tokens or nav change.
+All three generated files start with an `AUTO-GENERATED` banner — don't
+hand-edit them; edit `hal0-web`'s source files and re-run the script
+instead. Run it and commit the diff whenever hal0-web's tokens or nav
+change.
 
 **Not covered by the sync script** (change these by hand if they drift):
 
@@ -226,7 +265,9 @@ and commit the diff whenever hal0-web's tokens or nav change.
 ## Validation
 
 Installed and exercised against the live `forum.hal0.dev` (Discourse 8.0.5.1)
-as a component of the Foundation base theme.
+as a component of the Foundation base theme. That was the component-era
+install (see the top of this README) — the full-theme graduation below has
+not yet had its own live validation pass; see its still-open items.
 
 Done:
 
@@ -252,6 +293,19 @@ Done:
 
 Still open:
 
+- [ ] **Deployment model decision, before this ships**: as a component this
+      theme layered onto Foundation and inherited 100% of Foundation's CSS,
+      only overriding what `stylesheets/_hal0-discourse.scss` targets. As a
+      full theme it is installed *instead of* Foundation — Discourse only
+      lets components attach to a theme's Components list, not other
+      themes, so Foundation and this theme can't both be "the" active theme
+      at once. Whatever Foundation was contributing beyond what's covered by
+      [What is intentionally NOT themed here](#what-is-intentionally-not-themed-here)
+      (spacing tweaks, admin niceties, anything not explicitly restyled
+      here) goes away unless this theme is made the site default *and*
+      Foundation is kept only as an available alternate in the theme
+      selector rather than removed outright. Confirm this is the intended
+      tradeoff before installing on `forum.hal0.dev`.
 - [ ] Screenshot the topic list and an open topic and compare against
       `07 Forum.html`'s `TopicList` / `TopicView` states. Only the categories
       index has been compared so far. The topic rows/badges/avatars are
@@ -272,11 +326,20 @@ Still open:
 - [ ] Mobile: confirm the brand strip's nav links don't create a confusing
       double-hamburger situation next to Discourse's own mobile header
       controls.
-- [ ] Manual light/dark toggle (`interface_color_selector`) is **not
-      supported** — the chrome's tokens follow the OS preference, not the
-      user's override, so the two layers would disagree. Bridging the chrome
-      to Discourse's own `--primary`/`--secondary` variables would fix this
-      properly and is the right shape for that work.
+- [ ] Manual light/dark toggle (`interface_color_selector`): now wired
+      correctly in principle — `common/color_definitions.scss` resolves the
+      `--hal0-*` tokens per Discourse `ColorScheme` (via `dark-light-choose`)
+      rather than `(prefers-color-scheme: light)`, so they flip in lockstep
+      with core's own palette when a visitor forces light/dark
+      (`interface-color.js` toggles which of the two compiled
+      `color_definitions` stylesheets is active — see
+      [Syncing from hal0-web](#syncing-from-hal0-web)). **Not yet verified
+      live**: needs `interface_color_selector` turned on
+      (Admin → Settings), a scheme with `dark_color_scheme_id` set (see
+      [Install](#install) — required for the toggle to even appear;
+      `discourse-bootstrap.js` checks for a `link.dark-scheme` stylesheet),
+      and a manual toggle-and-inspect pass to confirm both the chrome and
+      Discourse's own UI repaint together.
 
 ## Forum content model
 
