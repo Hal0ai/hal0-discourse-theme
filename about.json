@@ -1,11 +1,14 @@
 {
   "name": "hal0 forum theme",
-  "component": true,
+  "component": false,
   "about_url": "https://github.com/Hal0ai/hal0-discourse-theme",
   "license_url": "https://github.com/Hal0ai/hal0-discourse-theme/blob/main/LICENSE",
   "authors": "hal0",
   "theme_version": "1.0.0",
   "minimum_discourse_version": "3.2.0",
+  "modifiers": {
+    "only_theme_color_schemes": true
+  },
   "color_schemes": {
     "hal0 dark": {
       "primary": "f5f5f4",

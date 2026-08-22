@@ -1,4 +1,4 @@
-// hal0 forum theme component — common/common.scss
+// hal0 forum theme — common/common.scss
 //
 // Loads the synced brand tokens, then the hand-authored chrome CSS that
 // styles the injected header/footer connectors. Everything the connectors
@@ -9,6 +9,16 @@
 // Discourse's own topic list / post / composer chrome is themed separately,
 // and much more lightly, via the "Discourse variable bridge" section below —
 // see the README's "what is NOT themed here" list.
+//
+// Only half the --hal0-* tokens are defined here (via the @import below) —
+// the scheme-invariant ones (fonts, radii, motion). The tokens that differ
+// between hal0's light and dark schemes live in ../common/color_definitions.scss
+// instead, compiled once per Discourse ColorScheme rather than once here —
+// see that file's header and the README's "Syncing from hal0-web" section.
+// Both sets land on the same --hal0-* custom properties, so nothing in this
+// file (or _hal0-discourse.scss) needs to know or care which file a given
+// token came from — CSS custom property resolution doesn't care about
+// stylesheet origin, only cascade order at paint time.
 
 @import "hal0-tokens";
 @import "hal0-discourse";
