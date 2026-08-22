@@ -91,6 +91,7 @@ TAG_GROUPS = {
     "Model Family": ["llama", "qwen", "mistral", "gemma", "deepseek",
                      "gpt-oss", "glm", "phi", "other-model"],
     "Workload": ["decode-tg", "prefill-pp", "mixed"],
+    "Platform": ["strix-halo", "npu-xdna", "gorgon-halo"],
     "Quant": ["fp16", "q8-0", "q6-k", "q5-k-m", "q4-k-m",
               "rocmfp4", "mxfp4", "awq", "other-quant"],
 }
@@ -328,9 +329,14 @@ HARDWARE_REPORT = """\
 """
 
 TEMPLATES = [
-    ("hal0 · Runner profile", RUNNER_PROFILE, ["setups-profiles"]),
-    ("hal0 · Benchmark run", BENCHMARK_RUN, ["benchmarks"]),
-    ("hal0 · Hardware report", HARDWARE_REPORT, ["strix-halo", "npu-xdna", "gorgon-halo"]),
+    # v2 (2026-08-22): categories consolidated for launch — see the ultraplan's
+    # empty-room defense. Profiles & Benchmarks (slug "profiles") carries both
+    # registry templates; Hardware (slug "hardware") carries hardware reports,
+    # with the platform expressed by the "Platform" tag group instead of
+    # per-platform categories.
+    ("hal0 · Runner profile", RUNNER_PROFILE, ["profiles"]),
+    ("hal0 · Benchmark run", BENCHMARK_RUN, ["profiles"]),
+    ("hal0 · Hardware report", HARDWARE_REPORT, ["hardware"]),
 ]
 
 
