@@ -1,0 +1,435 @@
+// hal0 → Discourse controls: buttons, selects, nav tabs, list control bar.
+//
+// The half of the destock sweep that is *chrome-shaped* rather than
+// content-shaped: everything a visitor clicks. `_hal0-discourse.scss` keeps
+// the content surfaces (topic rows, categories, posts, sidebar).
+//
+// Source of truth:
+//   _ds/…/components.css   — `.btn` (30px, 4px radius, mono 12px/600, one
+//                             solid amber per view, everything else ghost,
+//                             hover brightens 1.06, press nudges 0.5px)
+//   07 Forum.html          — `.ctlbar` (flex, 8px gap, 12px bottom margin),
+//                             `.dsel` (26px ghost select), `.dtabs` (4px
+//                             radius text tabs, active = solid amber)
+//
+// Method note: current Discourse (2026.x) exposes a large `--d-*` custom
+// property surface for exactly this (see core's
+// `common/foundation/base.scss`, `common/foundation/css-variables.scss`,
+// `common/components/buttons.scss`, `common/components/navs.scss` — every
+// button and nav rule reads these instead of a hardcoded colour). Setting
+// the variables is preferred over out-specifying core's selectors: it
+// survives markup churn, cannot leak onto elements core doesn't consider
+// part of that component, and keeps this file short. Explicit rules below
+// are only for the handful of properties core does NOT expose as a variable
+// — box height, type, and the hover filter.
+
+// ─── Discourse variable bridge: buttons ─────────────────────────────────
+// core/common/components/buttons.scss declares this whole block at :root and
+// every .btn variant reads it. Re-declaring it here re-skins .btn-primary /
+// .btn-default / .btn-danger / .btn-flat / .btn-transparent in one place —
+// including the ones this theme never sees directly (composer, modals,
+// admin), which is what keeps a "native" surface from reading stock.
+:root {
+  --d-button-border-radius: var(--hal0-rad-sm);
+  --d-button-transition:
+    filter var(--hal0-dur-fast) var(--hal0-ease),
+    background-color var(--hal0-dur-fast) var(--hal0-ease),
+    border-color var(--hal0-dur-fast) var(--hal0-ease),
+    color var(--hal0-dur-fast) var(--hal0-ease);
+
+  // .btn-primary → the comp's solid amber button. Near-black label, and the
+  // hover is the `filter: brightness(1.06)` below rather than a second
+  // colour, per "hover goes lighter, never darker".
+  --d-button-primary-bg-color: var(--hal0-accent);
+  --d-button-primary-bg-color--hover: var(--hal0-accent);
+  --d-button-primary-text-color: #0a0a0a;
+  --d-button-primary-text-color--hover: #0a0a0a;
+  --d-button-primary-icon-color: #0a0a0a;
+  --d-button-primary-icon-color--hover: #0a0a0a;
+  --d-button-primary-border: 1px solid var(--hal0-accent);
+  --d-button-primary-border--hover: 1px solid var(--hal0-accent);
+
+  // .btn-default → `.btn.ghost`: transparent, hairline border, --fg label.
+  // Core's default is a filled --primary-low chip, which is the single
+  // biggest source of "stock Discourse" on a themed forum.
+  --d-button-default-bg-color: transparent;
+  --d-button-default-bg-color--hover: var(--hal0-bg-2);
+  --d-button-default-text-color: var(--hal0-fg);
+  --d-button-default-text-color--hover: var(--hal0-fg);
+  --d-button-default-icon-color: var(--hal0-fg-dim);
+  --d-button-default-icon-color--hover: var(--hal0-fg);
+  --d-button-default-border: 1px solid var(--hal0-border);
+  --d-button-default-border--hover: 1px solid var(--hal0-border-strong);
+
+  // .btn-danger (and .btn.cancel) → `.btn.danger`: ghost, err line + label,
+  // soft err wash on hover. Destructive actions must not out-shout the one
+  // amber button.
+  --d-button-danger-bg-color: transparent;
+  --d-button-danger-bg-color--hover: var(--hal0-err-soft);
+  --d-button-danger-text-color: var(--hal0-err);
+  --d-button-danger-text-color--hover: var(--hal0-err);
+  --d-button-danger-icon-color: var(--hal0-err);
+  --d-button-danger-icon-color--hover: var(--hal0-err);
+  --d-button-danger-border: 1px solid var(--hal0-err-line);
+  --d-button-danger-border--hover: 1px solid var(--hal0-err-line);
+
+  --d-button-success-bg-color: transparent;
+  --d-button-success-bg-color--hover: var(--hal0-ok-soft);
+  --d-button-success-text-color: var(--hal0-ok);
+  --d-button-success-text-color--hover: var(--hal0-ok);
+  --d-button-success-icon-color: var(--hal0-ok);
+  --d-button-success-icon-color--hover: var(--hal0-ok);
+  --d-button-success-border: 1px solid var(--hal0-ok-line);
+  --d-button-success-border--hover: 1px solid var(--hal0-ok-line);
+
+  // .btn-flat / .btn-transparent — borderless affordances (post controls,
+  // modal close, menu rows). They stay borderless; only the colour ramp
+  // moves onto the brand's neutrals so they stop reading as blue-grey.
+  --d-button-flat-text-color: var(--hal0-fg-dim);
+  --d-button-flat-text-color--hover: var(--hal0-fg);
+  --d-button-flat-icon-color: var(--hal0-fg-dim);
+  --d-button-flat-icon-color--hover: var(--hal0-fg);
+  --d-button-flat-bg-color--hover: var(--hal0-bg-2);
+  --d-button-flat-bg-color--focus: var(--hal0-bg-2);
+  --d-button-flat-close-text-color: var(--hal0-fg-dim);
+  --d-button-flat-close-icon-color: var(--hal0-fg-dim);
+  --d-button-flat-close-icon-color--hover: var(--hal0-fg);
+  --d-button-transparent-text-color: var(--hal0-fg);
+  --d-button-transparent-text-color--hover: var(--hal0-accent);
+  --d-button-transparent-icon-color: var(--hal0-fg-dim);
+  --d-button-transparent-icon-color--hover: var(--hal0-accent);
+}
+
+// The parts of `.btn` core has no variable for: box height, radius scale,
+// type, and the two motion states.
+.btn {
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  // min-height, not height: core's .btn is inline-flex with its own padding,
+  // and a hard height clips multi-line labels (the composer's "Reply" button
+  // wraps on narrow viewports).
+  min-height: 30px;
+  padding: 6px 12px;
+}
+.btn:hover:not([disabled]):not(.disabled) {
+  filter: brightness(1.06);
+}
+// .ghost/.danger/.flat hover on a transparent fill: brightness() on a
+// transparent background does nothing visible but does dim the label, so the
+// wash from --d-button-*-bg-color--hover above carries the state instead.
+.btn-default:hover,
+.btn-danger:hover,
+.btn-success:hover,
+.btn-flat:hover,
+.btn-transparent:hover,
+.btn-link:hover {
+  filter: none;
+}
+.btn:active:not([disabled]):not(.disabled) {
+  transform: translateY(0.5px);
+}
+.btn.btn-small {
+  min-height: 26px;
+  font-size: 11px;
+  padding: 4px 9px;
+}
+.btn.btn-large {
+  min-height: 36px;
+  font-size: 13px;
+  padding: 8px 16px;
+}
+// Icon-only buttons are square at the same heights rather than pill-wide.
+.btn.no-text {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+// Borderless variants keep the lighter weight — 600 mono on a bare label
+// reads as a heading, not an action.
+.btn-flat,
+.btn-transparent,
+.btn-link {
+  font-weight: 500;
+}
+
+// ─── Discourse variable bridge: nav tabs ────────────────────────────────
+// core/common/components/navs.scss drives every `.nav-pills` set (the topic
+// list's latest/new/hot/categories bar, user pages, the about page, admin)
+// off these. The comp's `.dtabs` is a bare text tab with a 4px radius whose
+// active state is a solid amber chip — no border, no underline.
+//
+// This replaces the true-pill `.fpill` treatment the topic-list nav carried
+// before: `.fpill` is the comp's *filter* primitive (the category filter row
+// under the control bar), not its nav primitive, and using it for both left
+// the active tab indistinguishable from the inactive ones — core's underline
+// was doing all the work of showing which tab you were on.
+:root {
+  --d-nav-pill-border-radius: var(--hal0-rad-sm);
+  --d-nav-color: var(--hal0-fg-dim);
+  --d-nav-bg-color: transparent;
+  --d-nav-color--hover: var(--hal0-fg);
+  --d-nav-bg-color--hover: var(--hal0-bg-2);
+  --d-nav-color--active: #0a0a0a;
+  --d-nav-bg-color--active: var(--hal0-accent);
+  --d-nav-border-color--active: var(--hal0-accent);
+  // The active chip carries the state; core's amber-on-amber underline
+  // underneath it would just thicken the bottom edge.
+  --d-nav-underline-height: 0;
+}
+
+// Type + box for the tabs themselves. Core sizes these off the inherited
+// body scale (16px Inter); the comp's tabs are mono 12px.
+.nav-pills > li > a,
+.nav-pills > li > button {
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  letter-spacing: var(--hal0-ls-tight);
+  min-height: 28px;
+  padding: 5px 11px;
+  border: 0;
+}
+.nav-pills > li > a.active,
+.nav-pills > li > button.active {
+  // Core's nav-active mixin sets colour + background from the variables
+  // above; the accent hue on the label has to come off `currentColor` too,
+  // or the count span inside stays --fg-dim against amber.
+  color: #0a0a0a;
+}
+.nav-pills > li > a.active .d-icon,
+.nav-pills > li > a.active span,
+.nav-pills > li > button.active span {
+  color: inherit;
+}
+
+// Below ~1000px core collapses the whole tab set into a single dropdown
+// trigger (`.list-control-toggle-link-trigger`) that still lives inside
+// `.nav-pills`. It carries `.btn.no-text`, so it inherits the button type
+// above, but its label sits in a child span with its own size — and with no
+// border it reads as loose text rather than the control it is. Give it the
+// same ghost-select affordance the desktop breadcrumb selects get.
+.nav-pills > li > button.list-control-toggle-link-trigger {
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad-sm);
+  background: var(--hal0-bg-elevated);
+  color: var(--hal0-fg);
+  min-height: 30px;
+}
+.nav-pills .list-control-toggle-link-trigger .list-control-toggle-link__text {
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  letter-spacing: var(--hal0-ls-tight);
+}
+
+// ─── the control bar ────────────────────────────────────────────────────
+// `.ctlbar` in the comp: one row, 8px gap, wraps, 12px below. Discourse
+// splits the same row into `.category-breadcrumb` (the two selects),
+// `#navigation-bar` (the tabs) and `.navigation-controls` (new topic), each
+// laid out on its own baseline — which is why the selects sat 12px taller
+// than the tabs and the new-topic button floated in a box of its own.
+.navigation-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 0 0 12px;
+  row-gap: 8px;
+}
+.navigation-container .category-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.navigation-container .category-breadcrumb > li {
+  margin: 0;
+  padding: 0;
+}
+.navigation-container #navigation-bar.nav-pills {
+  gap: 2px;
+  margin: 0;
+}
+// Core leaves this element in the flow even when it has nothing in it (an
+// anonymous visitor gets no "new topic" button), where it reads as an empty
+// box holding the row open. `:empty` can't see it — it always carries an
+// empty `.dismiss-container-top` child — so match on that instead.
+.navigation-container .navigation-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.navigation-container .navigation-controls > .row.dismiss-container-top:empty {
+  display: none;
+}
+// `.list-controls` wraps the whole thing; its own bottom margin stacks with
+// the row's, which is where the dead band under the selects came from.
+.list-controls .container {
+  margin-bottom: 0;
+}
+
+// ─── `.dsel` — the breadcrumb selects ───────────────────────────────────
+// `categories ▾` / `tags ▾` and the period chooser. The comp's ghost select:
+// 26px, 4px radius, mono 11.5px, --bg-1 fill, hairline border. Core's is
+// 38px tall, 16px Inter, on `--input-border-color` (a --primary-400 grey
+// that is off-palette in both schemes).
+//
+// Scoped to the select-kits that are part of a *listing* control bar. The
+// composer's category/tag choosers are deliberately excluded — the design
+// brief keeps the composer native, and they need core's larger touch target.
+.navigation-container .select-kit.combo-box > .select-kit-header,
+.tags-page .select-kit.combo-box > .select-kit-header,
+.select-kit.period-chooser > .select-kit-header {
+  box-sizing: border-box;
+  min-height: 26px;
+  height: 26px;
+  padding: 0 10px;
+  gap: 7px;
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad-sm);
+  background: var(--hal0-bg-elevated);
+  color: var(--hal0-fg-dim);
+  font-family: var(--hal0-font-mono);
+  font-size: 11.5px;
+  font-weight: 400;
+  letter-spacing: var(--hal0-ls-tight);
+  text-transform: lowercase;
+  transition:
+    border-color var(--hal0-dur-fast) var(--hal0-ease),
+    color var(--hal0-dur-fast) var(--hal0-ease);
+}
+.navigation-container .select-kit.combo-box > .select-kit-header:hover,
+.tags-page .select-kit.combo-box > .select-kit-header:hover,
+.select-kit.period-chooser > .select-kit-header:hover {
+  border-color: var(--hal0-border-strong);
+  color: var(--hal0-fg);
+}
+.navigation-container .select-kit.combo-box > .select-kit-header .select-kit-header-wrapper,
+.tags-page .select-kit.combo-box > .select-kit-header .select-kit-header-wrapper,
+.select-kit.period-chooser > .select-kit-header .select-kit-header-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+}
+.navigation-container .select-kit.combo-box > .select-kit-header .name,
+.tags-page .select-kit.combo-box > .select-kit-header .name,
+.select-kit.period-chooser > .select-kit-header .name {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+// Core renders the affordance as `angle-right` and rotates it open; at 1em
+// off a 16px scale it is twice the size the comp draws it.
+.navigation-container .select-kit.combo-box > .select-kit-header .d-icon,
+.tags-page .select-kit.combo-box > .select-kit-header .d-icon,
+.select-kit.period-chooser > .select-kit-header .d-icon {
+  font-size: 11px;
+  color: var(--hal0-fg-faint);
+  margin: 0;
+}
+
+// The open panel is a genuinely floating layer, so it is one of the few
+// places the design allows a shadow.
+.select-kit.is-expanded .select-kit-body {
+  border-radius: var(--hal0-rad);
+  border-color: var(--hal0-border);
+  background: var(--hal0-bg-elevated);
+  box-shadow: var(--hal0-shadow-menu);
+}
+.select-kit .select-kit-row {
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  color: var(--hal0-fg-muted);
+}
+.select-kit .select-kit-row.is-highlighted,
+.select-kit .select-kit-row:hover {
+  background: var(--hal0-bg-2);
+  color: var(--hal0-fg);
+}
+.select-kit .select-kit-row.is-selected {
+  background: var(--hal0-accent-soft);
+  color: var(--hal0-accent);
+}
+
+// ─── Discourse variable bridge: surfaces, fields, elevation ─────────────
+// Core derives these from the colour scheme's `--primary-*` ramp, which is
+// close to the brand's neutrals but not identical — `--input-border-color`
+// resolves to a --primary-400 that reads olive next to --hal0-border. Point
+// them at the tokens directly.
+:root {
+  --content-border-color: var(--hal0-border);
+  --input-border-color: var(--hal0-border);
+  --table-border-color: var(--hal0-border);
+  --d-input-border-radius: var(--hal0-rad-sm);
+  --d-input-bg-color: var(--hal0-bg-elevated);
+  --d-input-text-color: var(--hal0-fg);
+  --d-input-focused-color: var(--hal0-accent);
+
+  // "Cards never carry shadow — only genuinely floating layers do."
+  --shadow-card: none;
+  --shadow-header: none;
+  --shadow-dropdown: var(--hal0-shadow-menu);
+  --shadow-menu-panel: var(--hal0-shadow-menu);
+  --shadow-modal: var(--hal0-shadow-menu);
+  --shadow-composer: var(--hal0-shadow-menu);
+
+  // Tags: the comp's 2px-radius outlined mono pill. `_hal0-discourse.scss`
+  // already restyles `.discourse-tag`; these two variables cover the tag
+  // instances core builds from custom properties instead (topic list
+  // metadata, tag drop rows).
+  --d-tag-border-radius: 3px;
+  --d-tag-font-size: 10px;
+  --d-tag-background-color: transparent;
+
+  // The design's own hover/active accents, so anything reading core's
+  // tertiary ramp lands on sodium amber rather than the scheme's
+  // approximation of it.
+  --tertiary-hover: var(--hal0-accent-hover);
+  --danger-hover: var(--hal0-err);
+  --success-hover: var(--hal0-ok);
+}
+
+// Focus is a 2px amber outline at 3px offset, everywhere (design brief,
+// "Accessibility"). Core's own `default-focus` mixin draws a --tertiary
+// outline at 0 offset from a handful of component rules; this is the floor
+// under all of them.
+:focus-visible {
+  outline: 2px solid var(--hal0-accent);
+  outline-offset: 3px;
+}
+
+// ─── unread / new count pill ────────────────────────────────────────────
+// The one amber pill in a topic row. `_hal0-discourse.scss` sets the fill and
+// type; core sizes the box off the 16px body scale, which is what made it
+// read as a blob beside a 14.5px title. Pin it to the comp's 18px chip and
+// stop it inheriting the row's line-height.
+.topic-list .badge-notification,
+.topic-list-item .badge-notification,
+.topic-list .badge-notification.unread-posts,
+.topic-list .badge-notification.new-topic {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  height: 18px;
+  min-width: 18px;
+  padding: 0 5px;
+  line-height: 1;
+  font-size: 10.5px;
+  font-weight: 600;
+  top: 0;
+  vertical-align: middle;
+}
+// Sidebar/nav counts are the same component at a smaller scale — keep them
+// quiet (a count is not an action) rather than amber.
+.sidebar-section-link .sidebar-section-link-content-badge,
+.nav-pills .badge-notification {
+  background: transparent;
+  color: var(--hal0-fg-faint);
+  font-family: var(--hal0-font-mono);
+  font-size: 10.5px;
+  padding: 0 0 0 4px;
+}

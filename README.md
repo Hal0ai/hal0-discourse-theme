@@ -33,8 +33,13 @@ common/
                                                see its header and "Syncing from hal0-web" below.
 stylesheets/
   _hal0-discourse.scss                        Discourse-surface restyle: topic list, tags, category
-                                               badges/page, nav pills, accepted answer, role chips,
-                                               sidebar, welcome banner, header/banner search
+                                               badges/page, accepted answer, role chips, sidebar,
+                                               welcome banner, header/banner search
+  _hal0-controls.scss                         Everything a visitor clicks: the --d-button-* /
+                                               --d-nav-* / --shadow-* variable bridge, the .btn
+                                               primitive, the breadcrumb selects (.dsel), the
+                                               latest/hot/categories tabs (.dtabs), the list
+                                               control bar and the unread count pill
   _hal0-docs.scss                             Docs/KB surface restyle: doc-categories' sidebar panel
                                                (.discourse-docs-sidebar-panel), and the Knowledge
                                                Base (body.category-kb) + Docs (body.category-docs)
