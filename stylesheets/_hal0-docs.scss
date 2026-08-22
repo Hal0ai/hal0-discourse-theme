@@ -221,7 +221,7 @@ body.category-kb {
   // (see _hal0-discourse.scss) — that part needs no repeating here.
   .category-boxes-with-topics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
   }
 
