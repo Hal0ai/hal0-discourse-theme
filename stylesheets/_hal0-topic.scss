@@ -1,0 +1,269 @@
+// hal0 → Discourse topic view restyle.
+//
+// This file is the "topic view" slice of the design brief's split of
+// responsibility — everything rendered at /t/<slug>/<id>: title, post
+// stream, post actions, the topic map, the timeline scrubber, small-action
+// posts, quotes, the reply/footer buttons, and suggested topics. It changes
+// no markup: every rule below targets a class or custom property Discourse
+// already renders/exposes. Topic-list rows, category badges, the accepted-
+// answer wash and role chips already live in _hal0-discourse.scss — this
+// file extends that surface, it does not restate it.
+//
+// Source of truth is the comp pack:
+//   hal0-web/docs/design/2026-08-09-community-comps/
+//     07 Forum.html  — .tshell / .thead / .post / .post-head / .post-body /
+//                       .post-acts / .tl (timeline) / .scard (referenced
+//                       here, suggested topics) / .replybar
+//
+// Comp class        → Discourse class / custom property
+//   .tshell          → .container.posts (grid: posts + timeline)
+//   .thead h1        → #topic-title h1
+//   .post            → .topic-post article.boxed (.topic-avatar + .topic-body)
+//   .post-head        → .topic-meta-data (names/role chips already themed)
+//   .post-body        → .cooked
+//   .post-body code   → .cooked code (inline, not fenced — .cooked pre is
+//                        already themed in _hal0-discourse.scss)
+//   .post-body blockquote → blockquote / aside.quote, via --d-post-aside-*
+//   .post-acts        → nav.post-controls .actions, via --d-post-control-*
+//   .replybar         → #topic-footer-buttons
+//   .tl               → .topic-timeline / .timeline-container
+//   .scard "referenced here" / "suggested topics" → .more-topics__container
+//                        (renders a .topic-list under the hood — see
+//                        _hal0-discourse.scss for the row/border/hover
+//                        treatment that already applies here for free)
+//   (no comp equivalent) → .topic-map "about this topic" stats row
+//
+// Several core rules here read a dedicated custom-property surface rather
+// than a hardcoded value (--d-post-aside-*, --d-post-control-*,
+// --topic-timeline-*). Per the batch brief, setting those wins over
+// out-specifying the selector — it survives markup churn. Selectors are
+// used only where no variable exists for what the comp asks for.
+
+// ─── topic title ────────────────────────────────────────────────────────
+// Core: #topic-title h1 { font-size: var(--font-up-4); ... } — a scale
+// token, not a custom property theme code can retarget, and core's weight
+// is the browser default (700), over the design's 600 cap. No variable
+// route; the comp's exact numbers (27px/1.25/500) aren't derivable from the
+// scale tokens, so this is a direct override.
+#topic-title h1 {
+  font-size: 27px;
+  line-height: 1.25;
+  letter-spacing: var(--hal0-ls-tight);
+  font-weight: 500;
+  color: var(--hal0-fg);
+}
+
+// ─── post body prose ────────────────────────────────────────────────────
+// Post copy stays Geist per the design brief (prose, not an identifier or
+// label) — only size/leading/color move to match the comp's .post-body.
+// Scoped to .topic-body so this never reaches the composer's own
+// .d-editor-preview, which shares the .cooked class but isn't this batch.
+.topic-body .cooked {
+  font-size: 15px;
+  line-height: 1.65;
+  color: var(--hal0-fg-muted);
+}
+
+// Inline code — mono chip, matching the comp's .post-body code. Excludes
+// code inside a fenced block: .cooked pre already gets the "well" treatment
+// in _hal0-discourse.scss, and this would otherwise double a border/bg
+// inside that surface.
+.topic-body .cooked code:not(pre code) {
+  font-family: var(--hal0-font-mono);
+  font-size: 12.5px;
+  color: var(--hal0-fg);
+  background: var(--hal0-bg-2);
+  border: 1px solid var(--hal0-border);
+  border-radius: 3px;
+  padding: 1px 5px;
+}
+
+// Quotes — both `<blockquote>` (plain markdown `>`) and `aside.quote`
+// (expandable quote-reply) read these two custom properties for their fill
+// and rail (app/assets/stylesheets/common/base/discourse.scss's bare
+// `blockquote` rule and topic-post.scss's `aside.quote .title` rule both
+// cite them), so setting them once covers both surfaces without a selector
+// per quote type.
+:root {
+  --d-post-aside-background: var(--hal0-bg-2);
+  --d-post-aside-border-left: 2px solid var(--hal0-border-strong);
+}
+.topic-body .cooked blockquote {
+  color: var(--hal0-fg-dim);
+  font-size: 14px;
+}
+
+// ─── post controls / actions (like, reply, quote, share, admin) ────────
+// Button pill sizing/hover chrome comes from the button lane's --d-button-*
+// bridge already; this is the separate --d-post-control-* surface core
+// defines specifically for the post-actions row (topic-post.scss:361), not
+// claimed elsewhere, so it's the right variable seam for this row's colour
+// and hover state. Font stays mono, matching the comp's .post-acts (11px
+// mono labels/counts) — no variable exists for that, so it's set directly
+// on the row.
+:root {
+  --d-post-control-text-color: var(--hal0-fg-dim);
+  --d-post-control-text-color--hover: var(--hal0-accent);
+  --d-post-control-icon-color: var(--hal0-fg-dim);
+  --d-post-control-icon-color--hover: var(--hal0-accent);
+  --d-post-control-background--hover: transparent;
+  --d-post-control-create-text-color: var(--hal0-fg-dim);
+  --d-post-control-create-icon-color: var(--hal0-fg-dim);
+  --d-post-control-sibling-text-color--hover: var(--hal0-accent);
+}
+nav.post-controls {
+  font-family: var(--hal0-font-mono);
+  font-size: 11px;
+  letter-spacing: var(--hal0-ls-tight);
+}
+.post-action,
+.post-action-menu__like-count {
+  font-family: var(--hal0-font-mono);
+  color: var(--hal0-fg-dim);
+}
+a.reply-to-tab {
+  font-family: var(--hal0-font-mono);
+  font-size: 11px;
+  color: var(--hal0-fg-dim);
+}
+
+// "show more posts" gap and the post-body truncation link — both plain
+// text/link affordances with no dedicated variable, mono per the design's
+// "route/state" rule, amber on hover like every other in-flow link.
+.gap {
+  font-family: var(--hal0-font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--hal0-ls-label);
+  color: var(--hal0-fg-dim);
+}
+.gap:hover {
+  color: var(--hal0-accent);
+}
+.expand-post a {
+  font-family: var(--hal0-font-mono);
+  font-size: 11px;
+  color: var(--hal0-accent);
+}
+
+// ─── small-action posts (renamed, closed, added-to-group, ...) ─────────
+// The comp doesn't render one, so this follows the sheet's own "state
+// label" rule (mono, dim) rather than a 1:1 comp mapping.
+.small-action-desc {
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  color: var(--hal0-fg-dim);
+}
+.small-action-desc a {
+  color: var(--hal0-fg);
+}
+.small-action-desc a:hover {
+  color: var(--hal0-accent);
+}
+
+// ─── topic footer buttons / reply bar ───────────────────────────────────
+// Button chrome itself is the button lane's; this is only the container's
+// hairline + spacing, matching the comp's .replybar (border-top, 16px/8px
+// vertical rhythm). The buttons already read the right colours via
+// --d-button-*.
+#topic-footer-buttons {
+  border-top: 1px solid var(--hal0-border);
+  padding-top: 16px;
+  margin-top: 8px;
+}
+.topic-footer-main-buttons .pinned-button .text,
+.topic-footer-main-buttons .topic-notifications-button .text {
+  font-family: var(--hal0-font-mono);
+  font-size: 11px;
+  color: var(--hal0-fg-dim);
+}
+
+// ─── topic map ("about this topic": replies / views / users / links) ───
+// No comp equivalent (the comp's TopicView never renders this widget), so
+// this follows the same numeral treatment as .tnum in the topic list —
+// mono, tabular, dim label under a brighter number — rather than inventing
+// a new pattern.
+.topic-map {
+  font-family: var(--hal0-font-mono);
+}
+.topic-map .number {
+  color: var(--hal0-fg);
+  font-variant-numeric: tabular-nums slashed-zero;
+}
+.topic-map__stat-label {
+  color: var(--hal0-fg-dim);
+  font-size: 10px;
+  letter-spacing: var(--hal0-ls-label);
+}
+.topic-map .estimated-read-time {
+  color: var(--hal0-fg-dim);
+}
+.topic-map .estimated-read-time span:first-child {
+  color: var(--hal0-fg-faint);
+}
+.topic-map .view-explainer {
+  color: var(--hal0-fg-faint);
+}
+// Participant avatars in the map's users-summary row — spacing only, the
+// avatars themselves stay native per the design brief.
+.topic-map .--users-summary {
+  gap: 6px;
+}
+
+// ─── timeline scrubber ──────────────────────────────────────────────────
+// Card chrome matches the comp's .tl (border, large radius, elevated
+// surface, 14px padding). The scrollarea's vertical track and the drag
+// handle read dedicated custom properties (topic-timeline.scss), so those
+// are set rather than chased through the widget's internal selectors.
+:root {
+  --topic-timeline-border-color: var(--hal0-border-strong);
+  --topic-timeline-handle-color: var(--hal0-accent);
+}
+.timeline-container .topic-timeline {
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad-lg);
+  background: var(--hal0-bg-elevated);
+  padding: 14px;
+  box-sizing: border-box;
+}
+.topic-timeline .timeline-replies {
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--hal0-fg-muted);
+}
+.topic-timeline .timeline-ago,
+.topic-timeline .timeline-date-wrapper,
+.topic-timeline .start-date,
+.topic-timeline .now-date {
+  font-family: var(--hal0-font-mono);
+  font-size: 10.5px;
+  color: var(--hal0-fg-dim);
+}
+
+// ─── topic progress control (mobile docked "N / M" pill) ───────────────
+#topic-progress {
+  background: var(--hal0-bg-elevated);
+  border: 1px solid var(--hal0-border);
+  color: var(--hal0-accent);
+}
+#topic-progress .nums {
+  font-family: var(--hal0-font-mono);
+  font-weight: 500;
+}
+#topic-progress .bg {
+  background-color: var(--hal0-accent-soft);
+}
+
+// ─── suggested topics / "more topics" (also covers related-messages) ───
+// The list itself renders as a .topic-list, so it already gets the card
+// border/radius/row treatment from _hal0-discourse.scss for free — this is
+// only the section label above it, matching the comp's .scard-h .label.
+.more-topics__list-title {
+  font-family: var(--hal0-font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--hal0-ls-label);
+  color: var(--hal0-fg-dim);
+}
