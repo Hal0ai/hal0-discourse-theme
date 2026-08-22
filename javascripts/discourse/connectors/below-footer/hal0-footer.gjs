@@ -6,11 +6,11 @@ import { HAL0_ICON_PATHS } from "../../lib/hal0-icons";
 
 // Hand-maintained — mirrors SiteFooter.astro's `footerVersion`, which comes
 // from parseChangelog() over hal0-web/src/data/changelog.md's latest
-// `## [x.y.z]` header (currently "1.0.0-rc.3"). The sync script doesn't
+// `## [x.y.z]` header (currently "1.0.0-rc.7"). The sync script doesn't
 // parse changelog.md yet, so this has to be bumped by hand when hal0-web's
 // changelog gains a new latest version — check it against changelog.md at
 // launch time and whenever this theme is updated afterward.
-const FOOTER_VERSION = "1.0.0-rc.3";
+const FOOTER_VERSION = "1.0.0-rc.7";
 
 /**
  * hal0-footer — the shared brand footer, identical to every other hal0.dev
