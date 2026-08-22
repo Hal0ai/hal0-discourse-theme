@@ -37,7 +37,14 @@
 //   body.category-kb/.category-docs .category-heading,
 //     .category-title-link .category-name          → KB landing header feel
 //   body.category-kb/.category-docs .topic-list     → .dtable idiom
-//   body.category-kb .discourse-tag (KB Area tags)  → .chip idiom
+//   body.category-kb .category-boxes-with-topics    → .kbcat KB category-card
+//     .category-box / .category-box-inner /            anatomy (icon/accent
+//     .category-box-heading h3 / .featured-topics       hue from the
+//                                                        category's own
+//                                                        color, mono title,
+//                                                        featured topics as
+//                                                        the "first pages"
+//                                                        list, hover filament)
 //
 // Generic comp var names (--bg, --line, --accent, ...) are not aliased
 // here — this file lives outside .hal0-chrome, so it uses the --hal0-*
@@ -182,29 +189,140 @@ body.category-kb {
     @extend %hal0-dtable-topic-list;
   }
 
-  // The six KB Area tags (getting-started, hardware-notes,
-  // runtime-backends, models-quants, operating-hal0, tool-reviews) as the
-  // .chip idiom — a filled, rounded pill — rather than the site-wide
-  // outlined .discourse-tag treatment, so the KB's own taxonomy reads as
-  // a distinct classifier system on this category only.
-  .discourse-tag,
-  .discourse-tags .discourse-tag {
-    display: inline-flex;
-    align-items: center;
-    height: 18px;
-    padding: 0 7px;
-    border: 1px solid var(--hal0-border);
-    border-radius: 3px;
-    background: var(--hal0-bg-2);
-    color: var(--hal0-fg-dim);
-    font-family: var(--hal0-font-mono);
-    font-size: 10px;
-    text-transform: lowercase;
+  // The six KB areas are subcategories (kb-getting-started, kb-hardware,
+  // kb-runtimes, kb-models, kb-operating, kb-tools — ids 13–18), each with
+  // its own category color, and this category's subcategory_list_style is
+  // boxes_with_featured_topics. Discourse renders that as
+  // frontend/discourse/app/components/categories-boxes-with-topics.gjs —
+  // verified from core source, not guessed:
+  //
+  //   <section class="category-boxes-with-topics with-logos|no-logos">
+  //     <div class="category category-box category-box-{slug}"
+  //          style="--category-badge-color: #{hex}">
+  //       <div class="category-box-inner">
+  //         <div class="category-box-heading">
+  //           <a class="parent-box-link" href="…"><h3>…</h3></a>
+  //         </div>
+  //         <div class="featured-topics">
+  //           <ul><li><svg class="d-icon">…</svg><a class="title">…</a></li></ul>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </section>
+  //
+  // This is the KB category-card anatomy from 04's .kbcat: the category's
+  // own --category-badge-color (already set inline by core, per
+  // categoryColorVariable) becomes the icon/accent hue, title goes mono,
+  // featured topics become the card's "first pages" list, and the card
+  // gets a hairline border + the .pcard 2px hover filament instead of
+  // core's default shadow-free-but-plain box. app/assets/stylesheets/
+  // common/base/category-list.scss already aliases
+  // --d-category-box-background-color to --hal0-bg-elevated site-wide
+  // (see _hal0-discourse.scss) — that part needs no repeating here.
+  .category-boxes-with-topics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .category-boxes-with-topics .category-box {
+    position: relative;
+    overflow: hidden;
+    border-left-width: 3px;
+    border-radius: var(--hal0-rad-lg);
+    transition: border-color var(--hal0-dur-fast) var(--hal0-ease);
+
+    // The filament — same gradient recipe as .pcard::after / the header,
+    // tinted through this category's own accent color where the design
+    // uses --accent, so each KB area's card brightens in its own hue.
+    &::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 2px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        var(--hal0-border) 18%,
+        color-mix(
+          in srgb,
+          var(--category-badge-color, var(--hal0-accent)) 65%,
+          var(--hal0-border)
+        )
+          50%,
+        var(--hal0-border) 82%,
+        transparent
+      );
+      opacity: 0.5;
+      transition: opacity var(--hal0-dur-fast) var(--hal0-ease);
+    }
 
     &:hover {
-      color: var(--hal0-accent);
-      border-color: var(--hal0-accent-line);
-      background: var(--hal0-accent-soft);
+      border-left-color: var(--category-badge-color, var(--hal0-accent));
+
+      &::after {
+        opacity: 1;
+      }
+    }
+  }
+
+  .category-boxes-with-topics .category-box-inner {
+    border-color: var(--hal0-border);
+    padding: 18px 20px 16px;
+  }
+
+  .category-boxes-with-topics .category-box-heading {
+    margin-bottom: 12px;
+
+    h3 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--hal0-font-mono);
+      font-size: 15px;
+      font-weight: 500;
+      letter-spacing: var(--hal0-ls-tight);
+      text-align: left;
+
+      // The category icon (CategoryTitleBefore), when set — the design's
+      // "icon carries the accent hue" — tinted with this card's own color.
+      .d-icon {
+        color: var(--category-badge-color, var(--hal0-accent));
+      }
+    }
+  }
+
+  // Featured topics — the card's "first pages" list, matching .kbcat ul li.
+  .category-boxes-with-topics .featured-topics {
+    margin-bottom: 0;
+    padding-top: 12px;
+    border-top: 1px solid var(--hal0-border-soft);
+
+    ul {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    li {
+      padding: 0;
+      font-family: var(--hal0-font-mono);
+      font-size: 11.5px;
+      color: var(--hal0-fg-dim);
+
+      .d-icon {
+        color: var(--hal0-fg-faint);
+      }
+
+      a.title {
+        color: var(--hal0-fg-dim);
+
+        &:hover {
+          color: var(--hal0-accent);
+        }
+      }
     }
   }
 }

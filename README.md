@@ -38,9 +38,13 @@ stylesheets/
   _hal0-docs.scss                             Docs/KB surface restyle: doc-categories' sidebar panel
                                                (.discourse-docs-sidebar-panel), and the Knowledge
                                                Base (body.category-kb) + Docs (body.category-docs)
-                                               category pages — topic list as a .dtable, KB Area
-                                               tags as .chip, category header/title in the KB
-                                               landing feel
+                                               category pages — topic list as a .dtable, category
+                                               header/title in the KB landing feel, and the KB's
+                                               six-subcategory boxes_with_featured_topics grid
+                                               (.category-boxes-with-topics) as the KB category-card
+                                               anatomy (category-color icon accent, mono title,
+                                               featured topics as the card's page list, hover
+                                               filament)
   _hal0-tokens.scss                           AUTO-GENERATED — the --hal0-* tokens that are
                                                identical in both schemes (fonts, radii, motion).
                                                Must live here, not in common/: Discourse compiles
