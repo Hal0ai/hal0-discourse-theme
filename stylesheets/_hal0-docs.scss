@@ -1,200 +1,109 @@
-// hal0 → discourse-docs / discourse-docs-card-filter restyle.
+// hal0 → docs/KB surfaces restyle.
 //
-// Restyles the official /docs route (discourse-docs plugin) and the
-// category/tag "cards" it renders from the discourse-docs-card-filter
-// theme component, so the KB / docs browse surface reads as the design's
-// KB landing rather than stock Discourse. CSS-only, no template overrides.
-// Everything below is scoped under the plugin's own route/component
-// classes (`.docs`, `.docs-browse`, `.docs-filters`, `.docs-topic-list`,
-// `.card-filter`) so nothing leaks onto the rest of the forum.
+// Scope changed mid-build (operator decision): the legacy discourse-docs
+// plugin and discourse-docs-card-filter component are being removed from
+// the forum outright. doc-categories is the only surviving docs plugin —
+// it renders a sidebar panel (reusing Discourse's own sidebar-section
+// components, not bespoke markup) on any topic inside a category that has
+// a doc index configured. The KB / docs browse experience is therefore
+// just the two categories themselves — /c/kb/12 and /c/docs/11 — restyled
+// as category-scoped surfaces, plus that sidebar panel. CSS-only, no
+// template overrides.
+//
+// Every selector below is scoped under one of:
+//   .discourse-docs-sidebar-panel     — the doc-categories sidebar panel
+//   body.category-kb                  — the Knowledge Base category page
+//   body.category-docs                — the Docs category page
+// (both body classes verified from core: ApplicationHelper#body_classes —
+// app/helpers/application_helper.rb — emits `category-#{slug_path}`, and
+// these two top-level categories' slugs are literally `kb` and `docs`.)
 //
 // Source of truth is the comp pack:
 //   hal0-web/docs/design/2026-08-09-community-comps/
-//     04 Blog and KB.html — .kbcat / .kbgrid / .kbside / .search (KB landing)
-//     08 Docs.html        — .dside / .dfoot (docs shell left rail)
-//     03 Profiles.html    — .pcard::after (the 2px hover filament)
-//     hal0-site.css       — .fpill, .dtable, .card primitives
+//     04 Blog and KB.html — .kbcat / .surface-tag (KB landing header feel)
+//     08 Docs.html        — .dside (mono label + list sidebar idiom)
+//     hal0-site.css       — .chip, .dtable primitives
 //
-// Plugin class (verified from source) → design primitive
-//   .docs                          → page root, no direct comp equivalent
-//   .docs-search-wrapper/-bar      → .search (04's KB search field)
-//   .docs-filters                  → .kbside / .dside (left rail)
-//   .docs-items > h3 (item-controls) → .label
-//   .docs-item (.docs-category/-tag) → .kbside a / .dside a (list row)
-//   .filter (category/tag list search) → .search, narrow
-//   .docs-topic-list .topic-list   → .dtable
-//   .docs-topic                    → inherits main theme, minor nav-link polish only
-//   .card-filter .docs-cards-filter → .kbgrid
-//   .docs-card-box (+ .category-card/.tag-card) → .kbcat, with the
-//     .pcard::after 2px bottom filament for the hover treatment
+// Plugin/core class (verified from source, not guessed) → design primitive
+//   .discourse-docs-sidebar-panel                  → panel root
+//   .sidebar-panel-header__row (back-to-forum)      → .backlink mono treatment
+//   .sidebar-section-header (real header element —  → .label (uppercase,
+//     see note below on why the wrapper-level rule                          10px, mono)
+//     in _hal0-discourse.scss doesn't reach it)
+//   .sidebar-section-link / .docs-sidebar-nav-link  → .dside a (list row;
+//                                                       active/hover already
+//                                                       inherit the global
+//                                                       --d-sidebar-* bridge)
+//   body.category-kb/.category-docs .category-heading,
+//     .category-title-link .category-name          → KB landing header feel
+//   body.category-kb/.category-docs .topic-list     → .dtable idiom
+//   body.category-kb .discourse-tag (KB Area tags)  → .chip idiom
 //
 // Generic comp var names (--bg, --line, --accent, ...) are not aliased
 // here — this file lives outside .hal0-chrome, so it uses the --hal0-*
 // custom properties directly, same convention as _hal0-discourse.scss.
 
-// ─── page scaffold ──────────────────────────────────────────────────────
-.docs {
-  // Plugin sets a tinted background on the search bar via --primary-very-low;
-  // neutralize it so it doesn't fight the KB's flat, hairline-only surfaces.
-  .docs-search {
-    background: none;
-  }
-}
-
-// ─── search field ───────────────────────────────────────────────────────
-// Same field spec as the header/welcome-banner search in _hal0-discourse.scss:
-// --bg-elevated fill, hairline border, mono placeholder.
-.docs-search-wrapper {
-  .docs-search-bar {
-    height: 40px;
-    padding: 0 40px 0 14px;
-    border: 1px solid var(--hal0-border);
-    border-radius: var(--hal0-rad-sm);
-    background: var(--hal0-bg-elevated);
-    color: var(--hal0-fg);
+// ─── doc-categories sidebar panel ───────────────────────────────────────
+// doc-categories registers its own sidebar *panel* (SIDEBAR_DOCS_PANEL =
+// "discourse-docs-sidebar") through Discourse's real sidebar-section API —
+// frontend/discourse/app/components/sidebar/api-panels.gjs wraps it as
+// `.sidebar-sections.{key}-panel`, i.e. `.discourse-docs-sidebar-panel`.
+// It reuses core's own section/link components, so most of the shape
+// already comes from the global --d-sidebar-* bridge in
+// _hal0-discourse.scss (active row = accent, hairlines, etc.) — only the
+// docs-panel-specific header treatment needs its own rule here.
+.discourse-docs-sidebar-panel {
+  // Note: _hal0-discourse.scss sets `.sidebar-section-header-wrapper {
+  // text-transform: lowercase }`, but that never actually reaches the
+  // header text — core's own `.sidebar-section-header` (a child of the
+  // wrapper) sets `text-transform: uppercase` directly on itself, and an
+  // element's own declared value always wins over an inherited one,
+  // regardless of ancestor specificity. Target the real element instead so
+  // this rule has an effect: uppercase, mono, 10px — the .label idiom.
+  .sidebar-section-header {
     font-family: var(--hal0-font-mono);
-    font-size: 12.5px;
-    transition: border-color var(--hal0-dur-fast) var(--hal0-ease);
-
-    &::placeholder {
-      color: var(--hal0-fg-faint);
-      font-family: var(--hal0-font-mono);
-    }
-    &:focus {
-      border-color: var(--hal0-border-strong);
-      outline: none;
-    }
-  }
-
-  .d-icon {
-    color: var(--hal0-fg-faint);
-  }
-
-  .btn.clear-search {
-    height: 24px;
-    padding: 0 8px;
-    border: 1px solid var(--hal0-border);
-    border-radius: var(--hal0-rad-sm);
-    background: var(--hal0-bg-elevated);
+    font-size: 10px;
+    letter-spacing: var(--hal0-ls-label);
     color: var(--hal0-fg-dim);
+  }
+
+  .sidebar-panel-header {
+    border-bottom: 1px solid var(--hal0-border-soft);
+    padding-bottom: 8px;
+    margin-bottom: 4px;
+  }
+
+  .sidebar-sections__back-to-forum {
     font-family: var(--hal0-font-mono);
-    font-size: 10.5px;
-    text-transform: lowercase;
-  }
-}
+    font-size: 11.5px;
+    letter-spacing: var(--hal0-ls-tight);
+    color: var(--hal0-fg-dim);
 
-// ─── filter sidebar (categories / tags / solved) ───────────────────────
-// The comp's left rail (.kbside / .dside): a mono list of rows grouped
-// under an uppercase label, active row carrying an accent inset rail.
-// Chosen over the .fpill idiom because the plugin already renders this as
-// an exclusive-select vertical list, not a wrapping pill bar.
-.docs-filters {
-  .docs-items {
-    .item-controls {
-      h3 {
-        margin: 0;
-        font-family: var(--hal0-font-mono);
-        font-size: 10px;
-        font-weight: 500;
-        text-transform: uppercase;
-        letter-spacing: var(--hal0-ls-label);
-        color: var(--hal0-fg-dim);
-      }
-
-      .item-controls-buttons .btn {
-        width: 22px;
-        height: 22px;
-        border-radius: var(--hal0-rad-sm);
-        color: var(--hal0-fg-faint);
-
-        svg {
-          color: inherit;
-        }
-        &:hover,
-        &.active {
-          background: var(--hal0-bg-2);
-          color: var(--hal0-fg-dim);
-
-          svg {
-            color: inherit;
-          }
-        }
-      }
-    }
-
-    .filter {
-      height: 28px;
-      padding: 0 10px;
-      border: 1px solid var(--hal0-border);
-      border-radius: var(--hal0-rad-sm);
-      background: var(--hal0-bg-elevated);
-      color: var(--hal0-fg);
-      font-family: var(--hal0-font-mono);
-      font-size: 11.5px;
-
-      &::placeholder {
-        color: var(--hal0-fg-faint);
-      }
-    }
-
-    ul {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
+    &:hover {
+      color: var(--hal0-accent);
     }
   }
 
-  // Category / tag rows and the "filter solved" checkbox row share this
-  // shape — mono row, quiet by default, accent inset rail when selected.
-  .docs-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 8px;
-    border-radius: var(--hal0-rad-sm);
+  // Section links — mono list rows, matching 08 Docs.html's .dside a.
+  // Active/hover backgrounds already come from the --d-sidebar-* bridge;
+  // only the typeface needs setting here since .sidebar-wrapper's mono
+  // rule in _hal0-discourse.scss already covers this panel too (kept
+  // explicit for clarity and in case this panel ever renders outside
+  // .sidebar-wrapper).
+  .sidebar-section-link,
+  .docs-sidebar-nav-link {
     font-family: var(--hal0-font-mono);
     font-size: 12px;
     letter-spacing: var(--hal0-ls-tight);
-    color: var(--hal0-fg-dim);
-    transition:
-      color var(--hal0-dur-fast) var(--hal0-ease),
-      background var(--hal0-dur-fast) var(--hal0-ease);
-
-    .d-icon {
-      color: var(--hal0-fg-faint);
-    }
-
-    &:hover {
-      background: var(--hal0-bg-2);
-      color: var(--hal0-fg);
-    }
-
-    &.selected {
-      background: var(--hal0-accent-soft);
-      color: var(--hal0-accent);
-      box-shadow: inset 2px 0 0 var(--hal0-accent);
-
-      .d-icon {
-        color: var(--hal0-accent);
-      }
-      &:hover {
-        background: var(--hal0-accent-soft);
-      }
-    }
-
-    .docs-item-count {
-      margin-left: auto;
-      font-family: var(--hal0-font-mono);
-      font-size: 10px;
-      color: var(--hal0-fg-faint);
-    }
   }
 }
 
-// ─── docs topic list — the .dtable idiom ────────────────────────────────
-// Denser and fully mono, unlike the forum's topic list: 40px rows,
-// uppercase 10px headers, right-aligned activity column.
-.docs-topic-list {
+// ─── shared dtable placeholder ──────────────────────────────────────────
+// One idiom, reused by both category pages below: mono, 40px rows,
+// uppercase 10px headers, right-aligned activity column. Layered on top
+// of the site-wide .topic-list card treatment in _hal0-discourse.scss
+// (border/radius/hover), which still applies underneath.
+%hal0-dtable-topic-list {
   .topic-list-header .topic-list-data,
   .topic-list-header th {
     height: 34px;
@@ -220,159 +129,91 @@
     }
   }
 
-  // Activity is the trailing numeric/date column — right-align it and its
-  // header, matching .dtable th.n / td.n.
   .topic-list-data.activity,
   td.activity {
     text-align: right;
   }
-  .topic-list-header .topic-list-data.activity {
-    text-align: right;
-  }
 }
 
-// ─── docs topic view ─────────────────────────────────────────────────────
-// The post itself inherits the main theme (topic-body/cooked rules in
-// _hal0-discourse.scss already cover it) — only the plugin's own bespoke
-// "« docs" back-link and "continue in topic →" link need the mono/backlink
-// treatment, since core doesn't render those.
-.docs-topic {
-  .docs-nav-link {
-    font-family: var(--hal0-font-mono);
-    font-size: 11.5px;
-    font-weight: 500;
-    letter-spacing: var(--hal0-ls-tight);
-    color: var(--hal0-fg-dim);
-
-    &:hover {
-      color: var(--hal0-accent);
-    }
-    &.return {
-      color: var(--hal0-fg-dim);
-    }
+// ─── shared category-header feel ────────────────────────────────────────
+// `.category-heading` / `.category-heading__description` only render when
+// the category has an uploaded logo (frontend/discourse/app/components/
+// discovery/navigation.gjs) — style them defensively so the KB landing
+// header feel is there the moment a logo is configured, without depending
+// on it. `.category-title-link .category-name` always renders (it's the
+// breadcrumb-adjacent category title) and gets the same mono/eyebrow
+// treatment as 04's `.surface-tag` + `.site-h1` pairing regardless.
+@mixin hal0-kb-doc-header {
+  .category-heading {
+    border-bottom: 1px solid var(--hal0-border);
+    padding-bottom: 20px;
+    margin-bottom: 20px;
   }
-}
-
-// ─── card-filter cards — the KB category-card anatomy ──────────────────
-// discourse-docs-card-filter's grid + card, restyled to the comp's .kbcat:
-// icon, mono title, blurb, hairline-separated footer, and the .pcard 2px
-// bottom filament that brightens on hover (03 Profiles.html).
-.card-filter {
-  .docs-cards-filter {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    column-gap: 16px;
-    row-gap: 16px;
-    justify-items: stretch;
-  }
-
-  .docs-card-box {
-    position: relative;
-    box-sizing: border-box;
-    width: 100%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 18px 20px 16px;
-    border: 1px solid var(--hal0-border);
-    border-radius: var(--hal0-rad-lg);
-    background: var(--hal0-bg-elevated);
-    color: var(--hal0-fg-muted);
-    box-shadow: none;
-    transform: none;
-    transition: border-color var(--hal0-dur-fast) var(--hal0-ease);
-
-    // The filament — same gradient recipe as .pcard::after / the header.
-    &::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 2px;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        var(--hal0-border) 18%,
-        color-mix(in srgb, var(--hal0-accent) 65%, var(--hal0-border)) 50%,
-        var(--hal0-border) 82%,
-        transparent
-      );
-      opacity: 0.5;
-      transition: opacity var(--hal0-dur-fast) var(--hal0-ease);
-    }
-
-    &:hover {
-      color: var(--hal0-fg-muted);
-      border-color: var(--hal0-border-strong);
-      box-shadow: none;
-      transform: none;
-
-      &::after {
-        opacity: 1;
-      }
-    }
-    &:visited {
-      color: var(--hal0-fg-muted);
-    }
-  }
-
-  .docs-card-box-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-
-    // Category-icon FontAwesome glyph mapped per settings.yml's
-    // category_icons/tag_icons — amber, no background circle.
-    .d-icon:not(.card-tag-icon) {
-      flex-shrink: 0;
-      width: 16px;
-      height: 16px;
-      margin-right: 0;
-      padding: 0;
-      border-radius: 0;
-      background: none;
-      color: var(--hal0-accent);
-      font-size: 16px;
-    }
-
-    .d-icon.card-tag-icon {
-      color: var(--hal0-fg-faint);
-      font-size: 13px;
-      margin-right: 0;
-    }
-
-    // Fallback swatch when a category has no mapped icon.
-    .docs-card-box-header-badge-category-bg {
-      border-radius: 2px;
-    }
-  }
-
-  .docs-card-box-header-title {
-    margin: 0;
-    font-family: var(--hal0-font-mono);
-    font-size: 15px;
-    font-weight: 500;
-    letter-spacing: var(--hal0-ls-tight);
-    color: var(--hal0-fg);
-  }
-
-  .docs-card-box-description {
-    p {
-      margin: 0;
-      font-size: 13px;
-      line-height: 1.55;
-      color: var(--hal0-fg-dim);
-    }
-  }
-
-  .docs-card-box-count {
-    margin-top: auto;
-    padding-top: 12px;
-    border-top: 1px solid var(--hal0-border-soft);
+  .category-heading__badge {
     font-family: var(--hal0-font-mono);
     font-size: 10px;
-    color: var(--hal0-fg-faint);
+    text-transform: uppercase;
+    letter-spacing: var(--hal0-ls-label);
+    color: var(--hal0-accent);
+  }
+  .category-heading__description {
+    color: var(--hal0-fg-dim);
+    font-size: 14px;
+    line-height: 1.55;
+    max-width: 58ch;
+  }
+
+  .category-title-link {
+    .category-name {
+      font-family: var(--hal0-font-mono);
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: var(--hal0-ls-title);
+      color: var(--hal0-fg);
+    }
+  }
+}
+
+// ─── Knowledge Base category (/c/kb/12) ─────────────────────────────────
+body.category-kb {
+  @include hal0-kb-doc-header;
+
+  .topic-list {
+    @extend %hal0-dtable-topic-list;
+  }
+
+  // The six KB Area tags (getting-started, hardware-notes,
+  // runtime-backends, models-quants, operating-hal0, tool-reviews) as the
+  // .chip idiom — a filled, rounded pill — rather than the site-wide
+  // outlined .discourse-tag treatment, so the KB's own taxonomy reads as
+  // a distinct classifier system on this category only.
+  .discourse-tag,
+  .discourse-tags .discourse-tag {
+    display: inline-flex;
+    align-items: center;
+    height: 18px;
+    padding: 0 7px;
+    border: 1px solid var(--hal0-border);
+    border-radius: 3px;
+    background: var(--hal0-bg-2);
+    color: var(--hal0-fg-dim);
+    font-family: var(--hal0-font-mono);
+    font-size: 10px;
+    text-transform: lowercase;
+
+    &:hover {
+      color: var(--hal0-accent);
+      border-color: var(--hal0-accent-line);
+      background: var(--hal0-accent-soft);
+    }
+  }
+}
+
+// ─── Docs category (/c/docs/11) ─────────────────────────────────────────
+body.category-docs {
+  @include hal0-kb-doc-header;
+
+  .topic-list {
+    @extend %hal0-dtable-topic-list;
   }
 }
