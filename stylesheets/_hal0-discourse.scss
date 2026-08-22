@@ -97,6 +97,39 @@
   line-height: 1.7;
 }
 
+// "download .toml" button injected by hal0-toml-download.js into fenced
+// ```toml blocks — the comp's .btn.ghost spec (30px, 4px radius, mono
+// 12px), positioned like a code-block copy button. .cooked pre above
+// already gives the block `position` for free... actually it doesn't
+// (position isn't set there), so set it here, scoped to blocks that
+// actually got a button rather than every <pre> in a post.
+.cooked pre.hal0-toml-block {
+  position: relative;
+}
+.cooked pre.hal0-toml-block .hal0-toml-download {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  display: inline-flex;
+  align-items: center;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--hal0-border);
+  border-radius: var(--hal0-rad-sm);
+  background: transparent;
+  color: var(--hal0-fg);
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition:
+    border-color var(--hal0-dur-fast) var(--hal0-ease),
+    background var(--hal0-dur-fast) var(--hal0-ease);
+}
+.cooked pre.hal0-toml-block .hal0-toml-download:hover {
+  border-color: var(--hal0-border-strong);
+  background: var(--hal0-bg-2);
+}
+
 // ─── topic list ─────────────────────────────────────────────────────────
 // The comp frames the list as a card: 1px border, large radius, elevated
 // surface, clipped corners. Discourse renders a bare <table>, so the frame
