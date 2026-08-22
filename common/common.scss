@@ -461,10 +461,28 @@ body.hal0-chrome-active {
 }
 
 // ── footer ────────────────────────────────────────────────────────────
+//
+// `below-footer` (application.gjs) renders unconditionally — it is NOT
+// gated by Discourse's own `showFooter` (the `footer` service's hider
+// registry, which `discovery/topics.gjs` holds open via
+// `{{hideApplicationFooter}}` for as long as the topic list has more pages
+// to infinite-scroll). Core's own footer content (`<PoweredByDiscourse />`,
+// the custom-HTML "footer" text) IS gated by it, and stays hidden on
+// `/`/`/latest`/`/top`/`/new` until the list is exhausted, while
+// `/categories` never registers a hider at all (none of its six display
+// components call the helper) and so shows its footer immediately. This
+// block previously assumed Discourse's own footer content always precedes
+// this one and supplies its own box/spacing — false whenever showFooter is
+// false — so nothing here depends on that: explicit display/width so nested
+// flex/grid ancestors can't collapse it, no reliance on a preceding
+// sibling's height.
 .hal0-chrome.ftr {
+  display: block;
+  width: 100%;
+  flex-shrink: 0;
   border-top: 1px solid var(--line);
   background: var(--bg-sunken);
-  margin-top: 0; // below-footer outlet already sits after Discourse's footer
+  margin-top: 0;
 }
 .hal0-chrome .ftr-cols {
   display: grid;
