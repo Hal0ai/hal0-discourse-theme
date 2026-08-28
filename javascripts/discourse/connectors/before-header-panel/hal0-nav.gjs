@@ -46,7 +46,11 @@ export default class Hal0Nav extends Component {
   <template>
     {{#if this.enabled}}
       <div class="hal0-chrome hal0-hdr-nav">
-        <span class="hdr-slug">forum</span>
+        {{! The comp put a "forum" property label here, after the wordmark's
+            divider. The nav below now carries `forum` as its own entry --
+            marked current rather than linked -- so the label was the same
+            word twice in one row, the first of which was not clickable. The
+            divider itself survives as .hdr-nav's ::before. }}
         <nav class="hdr-nav" aria-label="hal0.dev">
           {{#each this.links as |link|}}
             <a href={{this.hrefFor link}} rel="noopener" title="hal0.dev">
