@@ -334,4 +334,195 @@ body.category-docs {
   .topic-list {
     @extend %hal0-dtable-topic-list;
   }
+
+  // ── section cards, to the /docs hub's spec ────────────────────────────
+  //
+  // hal0.dev/docs renders each section as a .kbcat card: amber glyph, the
+  // section name, a blurb, a hairline, then the pages in mono, closing on
+  // "all N pages →". These rules put core's boxes_with_featured_topics into
+  // that same shape so a reader crossing from the hub to the forum does not
+  // meet a different object. Numbers are lifted from hal0-web's
+  // site-blog-kb.css rather than re-eyeballed.
+  //
+  // Scoped to the Docs page on purpose: the KB category keeps the
+  // category-coloured card the comp specifies for it (body.category-kb
+  // above), and this does not reach it.
+  .category-boxes-with-topics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 16px;
+  }
+
+  .category-boxes-with-topics .category-box {
+    border: 1px solid var(--hal0-border);
+    border-radius: var(--hal0-rad-lg);
+    background: var(--hal0-bg-elevated);
+    padding: 18px;
+    transition: border-color var(--hal0-dur-fast) var(--hal0-ease);
+
+    &:hover {
+      border-color: var(--hal0-border-strong);
+    }
+
+    // The hub cards carry no accent rail or filament; the glyph is the
+    // only colour on them.
+    &::after {
+      display: none;
+    }
+  }
+
+  .category-boxes-with-topics .category-box-inner {
+    display: flex;
+    flex-direction: column;
+  }
+
+  // heading, blurb, topics — the outlet renders the blurb after the topic
+  // list, so the order is stated rather than left to source order.
+  .category-boxes-with-topics .category-box-heading {
+    order: 0;
+  }
+  .category-boxes-with-topics .hal0-cat-blurb {
+    order: 1;
+  }
+  .category-boxes-with-topics .featured-topics {
+    order: 2;
+  }
+  .category-boxes-with-topics .hal0-cat-all {
+    order: 3;
+  }
+
+  .category-boxes-with-topics .category-box-heading h3 {
+    // The hub sets its glyph on its own line above the section name, so
+    // the heading is a column rather than an inline row.
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    // The hub writes its section names in lower case ("getting started");
+    // the forum's category names are sentence case, so they are lowered
+    // here rather than renamed on the server, where they also title the
+    // category page and the breadcrumb.
+    text-transform: lowercase;
+    font-family: var(--hal0-font-body);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--hal0-fg);
+    margin: 10px 0 6px;
+  }
+
+  // Core wraps the name in a category badge: a coloured square, then the
+  // name itself. The glyph already carries the section's identity, so the
+  // badge is stripped back to plain text -- NOT hidden, since the name
+  // lives inside it (span.badge-category__wrapper > .badge-category >
+  // .badge-category__name).
+  .category-boxes-with-topics .category-box-heading h3 .badge-category {
+    background: none;
+    padding: 0;
+    border: 0;
+
+    &::before {
+      display: none;
+    }
+  }
+  .category-boxes-with-topics .category-box-heading h3 .badge-category__icon {
+    display: none;
+  }
+  .category-boxes-with-topics .category-box-heading h3 .badge-category__name {
+    font-family: var(--hal0-font-body);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--hal0-fg);
+  }
+
+  .category-boxes-with-topics .hal0-cat-blurb {
+    margin: 0 0 14px;
+    font-family: var(--hal0-font-body);
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--hal0-fg-dim);
+  }
+
+  .category-boxes-with-topics .featured-topics {
+    border-top: 1px solid var(--hal0-border-soft);
+    padding-top: 12px;
+
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    li {
+      display: flex;
+      align-items: baseline;
+    }
+
+    // The hub's list is text only; core prefixes each row with a topic
+    // status icon that reads as noise at this size.
+    li .d-icon,
+    li svg {
+      display: none;
+    }
+
+    li a {
+      font-family: var(--hal0-font-mono);
+      font-size: 11.5px;
+      color: var(--hal0-fg-dim);
+
+      &:hover {
+        color: var(--hal0-accent);
+      }
+    }
+  }
+
+  .category-boxes-with-topics .hal0-cat-all {
+    display: inline-block;
+    margin-top: 12px;
+    font-family: var(--hal0-font-mono);
+    font-size: 10.5px;
+    color: var(--hal0-fg-faint);
+
+    &:hover {
+      color: var(--hal0-accent);
+    }
+  }
+
+  // One glyph per section, keyed on the slug class core emits
+  // (category-box-{slug}). Amber like the hub's, drawn as a mask so a
+  // single colour token drives all five.
+  .category-boxes-with-topics .category-box-heading h3::before {
+    content: "";
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin: 0 0 10px;
+    flex: 0 0 auto;
+    background: var(--hal0-accent);
+    mask-repeat: no-repeat;
+    mask-position: center;
+    mask-size: contain;
+  }
+  .category-box-docs-getting-started .category-box-heading h3::before {
+    // rocket — the first thing you run
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.9 2.1c-2.1-.3-4.4.6-6 2.2l-.9.9-2.3-.4a1 1 0 0 0-.9.3L1.4 7.5c-.3.3-.2.8.2.9l2.4.9 3 3 .9 2.4c.1.4.6.5.9.2l2.4-2.4a1 1 0 0 0 .3-.9l-.4-2.3.9-.9c1.6-1.6 2.5-3.9 2.2-6a.6.6 0 0 0-.3-.3zm-3.4 4.3a1.2 1.2 0 1 1-1.7-1.7 1.2 1.2 0 0 1 1.7 1.7z'/%3E%3C/svg%3E");
+  }
+  .category-box-docs-concepts .category-box-heading h3::before {
+    // layers — the model underneath
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1 1 4.6l7 3.6 7-3.6zM1.7 7.6 1 8l7 3.6L15 8l-.7-.4L8 10.7zm0 3.4-.7.4L8 15l7-3.6-.7-.4L8 14.1z'/%3E%3C/svg%3E");
+  }
+  .category-box-docs-guides .category-box-heading h3::before {
+    // compass — task by task
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 .8a7.2 7.2 0 1 0 0 14.4A7.2 7.2 0 0 0 8 .8zm0 1.6a5.6 5.6 0 1 1 0 11.2 5.6 5.6 0 0 1 0-11.2zm3 2.6L6.6 6.6 5 11l4.4-2L11 5zM8 7.2a.8.8 0 1 1 0 1.6.8.8 0 0 1 0-1.6z'/%3E%3C/svg%3E");
+  }
+  .category-box-docs-operate .category-box-heading h3::before {
+    // server — the box you actually run
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 2.5h12v4H2zm0 7h12v4H2zm1.6-5.6h1.6v1.6H3.6zm0 7h1.6v1.6H3.6z'/%3E%3C/svg%3E");
+  }
+  .category-box-docs-reference .category-box-heading h3::before {
+    // terminal — the exact contracts
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 2h13a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm2.1 3.2L3 6.1 5 7.9 3 9.7l.6.9 2.9-2.5zM8 10h4.5v-1H8z'/%3E%3C/svg%3E");
+  }
 }
