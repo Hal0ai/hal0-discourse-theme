@@ -443,21 +443,17 @@ body.has-sidebar-page {
 .hal0-chrome .hal0-subnav-away {
   margin-left: auto;
 }
-.hal0-chrome .hdr-slug {
-  font-family: var(--jbm);
-  font-size: 12px;
-  color: var(--fg-3);
-  letter-spacing: var(--ls-tight);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  text-transform: lowercase;
-}
-.hal0-chrome .hdr-slug::before {
+// The comp's divider between the wordmark and the nav. It used to hang off
+// a `.hdr-slug` element that also printed the word "forum" -- which the nav
+// itself now carries as a current-page entry, so the element is gone and the
+// rule moves here. Kept as a flex child rather than a border so the gap
+// either side comes from .hdr-nav's own `gap`.
+.hal0-chrome.hal0-hdr-nav > .hdr-nav::before {
   content: "";
   width: 1px;
   height: 16px;
   background: var(--line-strong);
+  flex: 0 0 auto;
 }
 .hal0-chrome .hdr-nav {
   display: flex;
