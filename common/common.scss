@@ -50,6 +50,44 @@ body.hal0-chrome-active {
 }
 
 // ---------------------------------------------------------------------------
+// Page frame width
+//
+// hal0-web's house frame is 1600px wide with 32px gutters -- see .wrap.wide /
+// .shell-wide in hal0-web src/styles/site.css (operator decision 2026-08-10:
+// the landing page's 1600/32 shell won over the comp's 1440/24). Discourse
+// instead frames pages at --d-max-width (1110px), plus --d-sidebar-width on
+// top of that on sidebar pages, so the forum read visibly narrower than the
+// rest of the site.
+//
+// Rather than override core's .wrap rules, re-point the variables core
+// derives every frame from, so the outer edge lands on 1600px in BOTH sidebar
+// states and the content column simply absorbs the sidebar's space when it is
+// collapsed. Core computes `body.has-sidebar-page .wrap` as
+// `--d-sidebar-width + --d-max-width`, hence the subtraction below; the
+// composer's own offsets (compose.scss) read the same two variables, so they
+// stay aligned for free.
+// ---------------------------------------------------------------------------
+:root {
+  --hal0-frame: 1600px;
+  --d-max-width: var(--hal0-frame);
+  // Match the site's 32px gutter on both the body frame and the header row
+  // (core defaults both to 0.67em).
+  --d-wrap-padding-x: 32px;
+  --d-header-padding-x: 32px;
+}
+
+body.has-sidebar-page {
+  --d-max-width: calc(var(--hal0-frame) - var(--d-sidebar-width));
+}
+
+@media (max-width: 640px) {
+  :root {
+    --d-wrap-padding-x: 16px;
+    --d-header-padding-x: 16px;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // .hal0-chrome — local alias scope for the injected header/footer markup.
 // Ported from docs/design/2026-08-09-community-comps/hal0-site.css
 // (.hdr / .ftr / .subnav rules + the .wrap / .iconbtn / .searchbtn / .drawer /
@@ -117,13 +155,20 @@ body.hal0-chrome-active {
 
 // ── page shell ──────────────────────────────────────────────────────────
 .hal0-chrome .wrap {
+  // border-box like hal0-web's `.site *`, so a max-width here is the OUTER
+  // frame width and lines up with the site's boxes rather than overshooting
+  // them by the gutters.
+  box-sizing: border-box;
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
   padding: 0 24px;
 }
 .hal0-chrome .wrap.wide {
-  max-width: 1440px;
+  // Same 1600/32 frame as hal0-web's .wrap.wide, so the injected footer
+  // lines up with the site footer and with the widened page frame above it.
+  max-width: var(--hal0-frame);
+  padding: 0 32px;
 }
 @media (max-width: 640px) {
   .hal0-chrome .wrap {
@@ -347,7 +392,14 @@ body.hal0-chrome-active {
 // Carries core's `.wrap` as well, for the same max-width and centring as
 // the header row; these declarations only add the row layout and undo the
 // theme's own wider .wrap padding, which would double the gutter here.
-.hal0-chrome .hal0-subnav-in {
+// `.wrap` is in the selector for specificity, not decoration: core's own
+// `body.has-sidebar-page .wrap` is (0,2,1) and beats a plain
+// `.hal0-chrome .hal0-subnav-in` (0,2,0), so without it the sub-nav keeps
+// core's full frame width and its first tab sits a gutter to the left of the
+// wordmark above it. Subtracting the two header gutters lands the tabs on the
+// same x as the wordmark and the sidebar.
+.hal0-chrome .wrap.hal0-subnav-in {
+  max-width: calc(var(--hal0-frame) - 2 * var(--d-header-padding-x));
   display: flex;
   align-items: center;
   gap: 18px;
