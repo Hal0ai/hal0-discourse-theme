@@ -197,15 +197,14 @@
 
 // Title: 14.5px, tight leading, muted until hovered. Unread topics come
 // forward to full --fg rather than getting a different weight.
-// Titles carry the brand face. The list is the closest thing the forum has
-// to the comp's .dtable, and a mono title is what makes it read as one
-// rather than as a generic feed -- the earlier dtable had this, and it was
-// worth keeping when the cramped metrics around it were not.
+// Titles stay in the body face. Mono was tried here (it is what the comp's
+// .dtable used) and reverted: a row title is a sentence, often a long one,
+// and mono costs it both width and readability at this size. The mono face
+// stays where it reads as a label rather than prose -- category card names,
+// column headers, the docs sidebar.
 .topic-list-item .link-top-line .title {
-  font-family: var(--hal0-font-mono);
   font-size: 14.5px;
   line-height: 1.35;
-  letter-spacing: var(--hal0-ls-tight);
   color: var(--hal0-fg-muted);
 }
 
