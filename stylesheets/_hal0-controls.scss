@@ -189,6 +189,23 @@
   padding: 5px 11px;
   border: 0;
 }
+
+// Core's own `.nav-pills > li > a` scores the same and lands later, so the
+// padding above was being dropped: tabs computed to `0 7.8px` with a 12px
+// line-height, which clipped the descender on "Categories" and left the
+// row looking uneven against the taller filter dropdowns beside it. This
+// scope outranks it.
+.list-controls .nav-pills > li > a,
+.list-controls .nav-pills > li > button {
+  padding: 6px 11px;
+  line-height: 1.25;
+}
+
+// 2px between tabs reads as a rendering accident rather than a gap. 8px
+// matches the space either side of the filter dropdowns that share the row.
+.list-controls .nav-pills {
+  gap: 8px;
+}
 .nav-pills > li > a.active,
 .nav-pills > li > button.active {
   // Core's nav-active mixin sets colour + background from the variables
