@@ -489,7 +489,11 @@ body.has-sidebar-page {
   position: absolute;
   left: 11px;
   right: 11px;
-  bottom: -1px;
+  // The link box is the full 56px header row, so pinning the bar to its
+  // bottom edge left it 20px under the word -- reading as a rule under the
+  // header rather than an underline on the link. 12px puts it ~6px below
+  // the text.
+  bottom: 12px;
   height: 2px;
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent-glow);

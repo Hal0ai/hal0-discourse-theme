@@ -206,12 +206,52 @@
 .list-controls .nav-pills {
   gap: 8px;
 }
+// Active tab: amber label with the header's underline, not a solid chip.
+// The chip read as a block floating in the row -- nothing else on the page
+// is a filled rectangle -- and it did not match the main nav one band above
+// it, which marks its current item with a 2px amber rule. Core already
+// draws an ::after bar for the active tab; it is restyled here rather than
+// hidden and redrawn.
 .nav-pills > li > a.active,
 .nav-pills > li > button.active {
-  // Core's nav-active mixin sets colour + background from the variables
-  // above; the accent hue on the label has to come off `currentColor` too,
-  // or the count span inside stays --fg-dim against amber.
-  color: #0a0a0a;
+  position: relative;
+  background: none;
+  color: var(--hal0-accent);
+}
+.nav-pills > li > a.active::after,
+.nav-pills > li > button.active::after {
+  background: var(--hal0-accent);
+  height: 2px;
+  left: 11px;
+  right: 11px;
+  bottom: 1px;
+  box-shadow: 0 0 8px var(--hal0-accent-glow);
+}
+.nav-pills > li > a:hover,
+.nav-pills > li > button:hover {
+  color: var(--hal0-accent);
+}
+
+// The /new page's All | Topics | Replies switch. These are plain buttons,
+// not nav-pills, so they were picking the colour scheme's tertiary straight
+// out of core as a filled amber square. Same treatment as the tabs above:
+// the label carries the state, nothing else.
+.topics-replies-toggle {
+  font-family: var(--hal0-font-mono);
+  font-size: 12px;
+  letter-spacing: var(--hal0-ls-tight);
+  padding: 6px 11px;
+  border: 0;
+  border-radius: var(--hal0-rad-sm);
+  background: none;
+  color: var(--hal0-fg-dim);
+
+  &:hover,
+  &:focus,
+  &.active {
+    background: none;
+    color: var(--hal0-accent);
+  }
 }
 .nav-pills > li > a.active .d-icon,
 .nav-pills > li > a.active span,
