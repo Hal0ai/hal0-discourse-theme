@@ -287,6 +287,15 @@
   margin-bottom: 0;
 }
 
+// Core hangs the row's breathing room entirely off the bottom
+// (`.navigation-container` ships `margin: 0 0 12px`), so the tabs sat flush
+// against the top of the 40px row with all 12px dangling underneath -- the
+// row read as sitting too high in its own band. Same total, split evenly.
+.list-controls .navigation-container {
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
 // ─── `.dsel` — the breadcrumb selects ───────────────────────────────────
 // `categories ▾` / `tags ▾` and the period chooser. The comp's ghost select:
 // 26px, 4px radius, mono 11.5px, --bg-1 fill, hairline border. Core's is
