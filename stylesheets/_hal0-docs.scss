@@ -347,10 +347,20 @@ body.category-docs {
   // Scoped to the Docs page on purpose: the KB category keeps the
   // category-coloured card the comp specifies for it (body.category-kb
   // above), and this does not reach it.
+  // Same two-step as the /docs hub (site-blog-kb.css .kbgrid + the page's
+  // own @media override): an auto-fill floor for narrow viewports, pinned to
+  // three columns once there is room, so a card is ~450px rather than the
+  // ~350px four-up auto-fit was giving.
   .category-boxes-with-topics {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 16px;
+  }
+
+  @media (min-width: 1100px) {
+    .category-boxes-with-topics {
+      grid-template-columns: repeat(3, 1fr);
+    }
   }
 
   .category-boxes-with-topics .category-box {
@@ -392,11 +402,10 @@ body.category-docs {
   }
 
   .category-boxes-with-topics .category-box-heading h3 {
-    // The hub sets its glyph on its own line above the section name, so
-    // the heading is a column rather than an inline row.
+    // Glyph inline with the name, not stacked above it.
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     text-align: left;
     // The hub writes its section names in lower case ("getting started");
     // the forum's category names are sentence case, so they are lowered
@@ -496,9 +505,9 @@ body.category-docs {
   .category-boxes-with-topics .category-box-heading h3::before {
     content: "";
     display: inline-block;
-    width: 18px;
-    height: 18px;
-    margin: 0 0 10px;
+    width: 17px;
+    height: 17px;
+    margin: 0 9px 0 0;
     flex: 0 0 auto;
     background: var(--hal0-accent);
     mask-repeat: no-repeat;
@@ -520,6 +529,10 @@ body.category-docs {
   .category-box-docs-operate .category-box-heading h3::before {
     // server — the box you actually run
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M2 2.5h12v4H2zm0 7h12v4H2zm1.6-5.6h1.6v1.6H3.6zm0 7h1.6v1.6H3.6z'/%3E%3C/svg%3E");
+  }
+  .category-box-docs-troubleshooting .category-box-heading h3::before {
+    // life buoy — when it is not going the way the guides said
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 .8a7.2 7.2 0 1 0 0 14.4A7.2 7.2 0 0 0 8 .8zm0 1.8c.9 0 1.7.2 2.4.6L9 4.6a3.4 3.4 0 0 0-2 0L5.6 3.2A5.4 5.4 0 0 1 8 2.6zM3.2 5.6 4.6 7a3.4 3.4 0 0 0 0 2L3.2 10.4a5.4 5.4 0 0 1 0-4.8zM8 13.4c-.9 0-1.7-.2-2.4-.6L7 11.4a3.4 3.4 0 0 0 2 0l1.4 1.4c-.7.4-1.5.6-2.4.6zm4.8-3-1.4-1.4a3.4 3.4 0 0 0 0-2l1.4-1.4a5.4 5.4 0 0 1 0 4.8zM8 6.3a1.7 1.7 0 1 1 0 3.4 1.7 1.7 0 0 1 0-3.4z'/%3E%3C/svg%3E");
   }
   .category-box-docs-reference .category-box-heading h3::before {
     // terminal — the exact contracts
