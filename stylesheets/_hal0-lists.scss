@@ -125,6 +125,10 @@
   text-transform: uppercase;
   letter-spacing: var(--hal0-ls-label);
   color: var(--hal0-fg-dim);
+  // Core gives this 3.5px of side padding, so the word sat flush against
+  // the card edge while every row beneath it starts at 16px. Same gutter as
+  // the rows, and as .topic-list's own header.
+  padding: 9px 16px;
   border-bottom: 1px solid var(--hal0-border);
 }
 .latest-topic-list-item {
@@ -137,10 +141,23 @@
   background: var(--hal0-bg-2);
 }
 .latest-topic-list-item .main-link a.title {
-  font-size: 13.5px;
+  // 14.5px, matching .topic-list-item's title: this column is the same
+  // object as the main list, just narrower, and it read a size smaller.
+  font-size: 14.5px;
   line-height: 1.4;
   color: var(--hal0-fg-muted);
   padding: 0;
+}
+
+// Read state, exactly as the main topic list does it (see
+// _hal0-discourse.scss): a topic you have read goes grey, one you have not
+// stays bright. This column had no distinction at all -- every title
+// rendered --hal0-fg-muted whether or not you had been there.
+.latest-topic-list-item.visited .main-link a.title {
+  color: var(--hal0-fg-dim);
+}
+.latest-topic-list-item:not(.visited) .main-link a.title {
+  color: var(--hal0-fg);
 }
 .latest-topic-list-item:hover .main-link a.title {
   color: var(--hal0-accent);
