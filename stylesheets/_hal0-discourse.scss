@@ -259,6 +259,25 @@
   flex-shrink: 0;
 }
 
+// On /categories the badge is not a chip labelling something else -- it IS
+// the row's title, sitting in an <h3> the page already sizes at ~18px. The
+// 10.5px above is right for a badge under a topic title and far too small
+// here, so this scope takes the heading's own size and the weight the card
+// names use. The colour square keeps its dimensions; only the text grows.
+.category-list td.category h3 .badge-category {
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: var(--hal0-ls-tight);
+  color: var(--hal0-fg);
+}
+.category-list td.category h3 .badge-category .badge-category__icon {
+  width: 10px;
+  height: 10px;
+}
+.category-list td.category h3 .badge-category__wrapper:hover .badge-category {
+  color: var(--hal0-accent);
+}
+
 // Tags: outlined mono pills, quieter than the category.
 .discourse-tag,
 .discourse-tags .discourse-tag {
