@@ -493,10 +493,11 @@ textarea:focus-visible,
 // type; core sizes the box off the 16px body scale, which is what made it
 // read as a blob beside a 14.5px title. Pin it to the comp's 18px chip and
 // stop it inheriting the row's line-height.
-.topic-list .badge-notification,
-.topic-list-item .badge-notification,
-.topic-list .badge-notification.unread-posts,
-.topic-list .badge-notification.new-topic {
+// `.new-topic` is deliberately excluded: it is a dot, not a chip (see
+// _hal0-discourse.scss). Sizing it as one is what made it a blob.
+.topic-list .badge-notification:not(.new-topic),
+.topic-list-item .badge-notification:not(.new-topic),
+.topic-list .badge-notification.unread-posts {
   display: inline-flex;
   align-items: center;
   justify-content: center;
