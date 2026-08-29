@@ -256,9 +256,12 @@ body.category-kb {
     // here rather than renamed on the server, where they also title the
     // category page and the breadcrumb.
     text-transform: lowercase;
-    font-family: var(--hal0-font-body);
+    // Mono, like the topic titles below the cards -- the card name and the
+    // list title are the same kind of object and now read as one family.
+    font-family: var(--hal0-font-mono);
     font-size: 15px;
     font-weight: 600;
+    letter-spacing: var(--hal0-ls-tight);
     color: var(--hal0-fg);
     margin: 10px 0 6px;
   }
@@ -281,9 +284,10 @@ body.category-kb {
     display: none;
   }
   .category-boxes-with-topics .category-box-heading h3 .badge-category__name {
-    font-family: var(--hal0-font-body);
+    font-family: var(--hal0-font-mono);
     font-size: 15px;
     font-weight: 600;
+    letter-spacing: var(--hal0-ls-tight);
     color: var(--hal0-fg);
   }
 
