@@ -350,3 +350,27 @@
 // would be exactly the kind of guess the harness exists to prevent. Flagged
 // in the report as a follow-up once the forum has real member data to
 // render the table against.
+
+// ─── "Want to read more?" ───────────────────────────────────────────────
+// The line under a topic's suggested list ("There are 10 new topics
+// remaining, or browse other topics in X"). Core marks it up as an <h3>
+// (components/more-topics/browse-more.gjs), so it inherited heading
+// treatment -- 16.4px, weight 600, full --fg -- and read louder than the
+// topic titles above it. It is a footnote: an aside pointing elsewhere
+// once you have finished reading.
+.more-topics__browse-more {
+  font-family: var(--hal0-font-body);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--hal0-fg-dim);
+
+  a {
+    font-weight: 400;
+    color: var(--hal0-fg-muted);
+
+    &:hover {
+      color: var(--hal0-accent);
+    }
+  }
+}
