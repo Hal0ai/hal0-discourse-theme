@@ -221,11 +221,21 @@
 .topic-list-item:hover .link-top-line .title {
   color: var(--hal0-accent);
 }
-.topic-list-item.visited .link-top-line .title {
+// Read state: a topic you have read goes grey, one you have not stays
+// bright. Core marks the ROW (`.visited` on .topic-list-item — see
+// topic-list/item.gjs); there is no class on the link itself.
+//
+// This used to also match `.title.top-line-visited` and paint it full
+// --fg. That class no longer exists anywhere in core, and the rule sat
+// AFTER the dim one, so on any Discourse that still emitted it a read
+// topic came out brighter than an unread one — the exact inversion, in
+// the one selector that outranked the rule meant to prevent it.
+.topic-list-item.visited .link-top-line .title,
+.topic-list-item.visited .title {
   color: var(--hal0-fg-dim);
 }
-.topic-list-item .link-top-line .title.top-line-visited,
-.topic-list-item:not(.visited) .link-top-line .title {
+.topic-list-item:not(.visited) .link-top-line .title,
+.topic-list-item:not(.visited) .title {
   color: var(--hal0-fg);
 }
 
@@ -265,7 +275,9 @@
 // here, so this scope takes the heading's own size and the weight the card
 // names use. The colour square keeps its dimensions; only the text grows.
 .category-list td.category h3 .badge-category {
-  font-size: 17px;
+  // 15px: the same size a section card's name uses, one step down from the
+  // 17px first tried here, which crowded the description under it.
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: var(--hal0-ls-tight);
   color: var(--hal0-fg);
