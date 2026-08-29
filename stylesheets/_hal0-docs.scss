@@ -105,42 +105,6 @@
   }
 }
 
-// ─── shared dtable placeholder ──────────────────────────────────────────
-// One idiom, reused by both category pages below: mono, 40px rows,
-// uppercase 10px headers, right-aligned activity column. Layered on top
-// of the site-wide .topic-list card treatment in _hal0-discourse.scss
-// (border/radius/hover), which still applies underneath.
-%hal0-dtable-topic-list {
-  .topic-list-header .topic-list-data,
-  .topic-list-header th {
-    height: 34px;
-    font-family: var(--hal0-font-mono);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: var(--hal0-ls-label);
-  }
-
-  .topic-list-item {
-    > td {
-      height: 40px;
-      padding-top: 0;
-      padding-bottom: 0;
-      font-family: var(--hal0-font-mono);
-      font-size: 12.5px;
-    }
-
-    .link-top-line .title {
-      font-family: var(--hal0-font-mono);
-      font-size: 12.5px;
-      letter-spacing: var(--hal0-ls-tight);
-    }
-  }
-
-  .topic-list-data.activity,
-  td.activity {
-    text-align: right;
-  }
-}
 
 // ─── shared category-header feel ────────────────────────────────────────
 // `.category-heading` / `.category-heading__description` only render when
@@ -185,20 +149,21 @@
 body.category-kb {
   @include hal0-kb-doc-header;
 
-  .topic-list {
-    @extend %hal0-dtable-topic-list;
-  }
-
-  // Section cards come from the shared block below.
+  // Topic list: the site-wide treatment in _hal0-discourse.scss, which is
+  // already the comp's table -- mono uppercase headers, hairline rows,
+  // 14.5px titles, 12px cell padding. This block used to @extend a denser
+  // variant (40px fixed rows, zero vertical padding, 12.5px mono titles)
+  // that made docs and KB the only categories on the forum whose rows were
+  // half the height of everyone else's, and cramped besides: these rows
+  // carry an excerpt and a category badge, which the comp's reference table
+  // never had.
 }
 
 // ─── Docs category (/c/docs/11) ─────────────────────────────────────────
 body.category-docs {
   @include hal0-kb-doc-header;
 
-  .topic-list {
-    @extend %hal0-dtable-topic-list;
-  }
+  // Site-wide topic-list treatment here too -- see the note on the KB block.
 }
 
 // ── section cards, to the /docs hub's spec ─────────────────────────────
