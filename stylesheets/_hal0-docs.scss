@@ -189,142 +189,7 @@ body.category-kb {
     @extend %hal0-dtable-topic-list;
   }
 
-  // The six KB areas are subcategories (kb-getting-started, kb-hardware,
-  // kb-runtimes, kb-models, kb-operating, kb-tools — ids 13–18), each with
-  // its own category color, and this category's subcategory_list_style is
-  // boxes_with_featured_topics. Discourse renders that as
-  // frontend/discourse/app/components/categories-boxes-with-topics.gjs —
-  // verified from core source, not guessed:
-  //
-  //   <section class="category-boxes-with-topics with-logos|no-logos">
-  //     <div class="category category-box category-box-{slug}"
-  //          style="--category-badge-color: #{hex}">
-  //       <div class="category-box-inner">
-  //         <div class="category-box-heading">
-  //           <a class="parent-box-link" href="…"><h3>…</h3></a>
-  //         </div>
-  //         <div class="featured-topics">
-  //           <ul><li><svg class="d-icon">…</svg><a class="title">…</a></li></ul>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </section>
-  //
-  // This is the KB category-card anatomy from 04's .kbcat: the category's
-  // own --category-badge-color (already set inline by core, per
-  // categoryColorVariable) becomes the icon/accent hue, title goes mono,
-  // featured topics become the card's "first pages" list, and the card
-  // gets a hairline border + the .pcard 2px hover filament instead of
-  // core's default shadow-free-but-plain box. app/assets/stylesheets/
-  // common/base/category-list.scss already aliases
-  // --d-category-box-background-color to --hal0-bg-elevated site-wide
-  // (see _hal0-discourse.scss) — that part needs no repeating here.
-  .category-boxes-with-topics {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 16px;
-  }
-
-  .category-boxes-with-topics .category-box {
-    position: relative;
-    overflow: hidden;
-    border-left-width: 3px;
-    border-radius: var(--hal0-rad-lg);
-    transition: border-color var(--hal0-dur-fast) var(--hal0-ease);
-
-    // The filament — same gradient recipe as .pcard::after / the header,
-    // tinted through this category's own accent color where the design
-    // uses --accent, so each KB area's card brightens in its own hue.
-    &::after {
-      content: "";
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 2px;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        var(--hal0-border) 18%,
-        color-mix(
-          in srgb,
-          var(--category-badge-color, var(--hal0-accent)) 65%,
-          var(--hal0-border)
-        )
-          50%,
-        var(--hal0-border) 82%,
-        transparent
-      );
-      opacity: 0.5;
-      transition: opacity var(--hal0-dur-fast) var(--hal0-ease);
-    }
-
-    &:hover {
-      border-left-color: var(--category-badge-color, var(--hal0-accent));
-
-      &::after {
-        opacity: 1;
-      }
-    }
-  }
-
-  .category-boxes-with-topics .category-box-inner {
-    border-color: var(--hal0-border);
-    padding: 18px 20px 16px;
-  }
-
-  .category-boxes-with-topics .category-box-heading {
-    margin-bottom: 12px;
-
-    h3 {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-family: var(--hal0-font-mono);
-      font-size: 15px;
-      font-weight: 500;
-      letter-spacing: var(--hal0-ls-tight);
-      text-align: left;
-
-      // The category icon (CategoryTitleBefore), when set — the design's
-      // "icon carries the accent hue" — tinted with this card's own color.
-      .d-icon {
-        color: var(--category-badge-color, var(--hal0-accent));
-      }
-    }
-  }
-
-  // Featured topics — the card's "first pages" list, matching .kbcat ul li.
-  .category-boxes-with-topics .featured-topics {
-    margin-bottom: 0;
-    padding-top: 12px;
-    border-top: 1px solid var(--hal0-border-soft);
-
-    ul {
-      display: flex;
-      flex-direction: column;
-      gap: 7px;
-    }
-
-    li {
-      padding: 0;
-      font-family: var(--hal0-font-mono);
-      font-size: 11.5px;
-      color: var(--hal0-fg-dim);
-
-      .d-icon {
-        color: var(--hal0-fg-faint);
-      }
-
-      a.title {
-        color: var(--hal0-fg-dim);
-
-        &:hover {
-          color: var(--hal0-accent);
-        }
-      }
-    }
-  }
+  // Section cards come from the shared block below.
 }
 
 // ─── Docs category (/c/docs/11) ─────────────────────────────────────────
@@ -334,8 +199,22 @@ body.category-docs {
   .topic-list {
     @extend %hal0-dtable-topic-list;
   }
+}
 
-  // ── section cards, to the /docs hub's spec ────────────────────────────
+// ── section cards, to the /docs hub's spec ─────────────────────────────
+//
+// Docs and the Knowledge Base both render boxes_with_featured_topics, and
+// both should read as the hub's .kbcat card rather than as two different
+// objects. KB carried its own card here — the comp's category-coloured rail
+// and hover filament, written before the docs cards existed — and the two
+// drifted apart the moment the docs cards were restyled. One rule set now,
+// keyed to both category pages.
+//
+// Metrics are lifted from hal0-web's site-blog-kb.css rather than
+// re-eyeballed. Per-section glyphs are at the bottom, on the
+// category-box-{slug} class core emits.
+body.category-docs,
+body.category-kb {
   //
   // hal0.dev/docs renders each section as a .kbcat card: amber glyph, the
   // section name, a blurb, a hairline, then the pages in mono, closing on
@@ -534,8 +413,37 @@ body.category-docs {
     // life buoy — when it is not going the way the guides said
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 .8a7.2 7.2 0 1 0 0 14.4A7.2 7.2 0 0 0 8 .8zm0 1.8c.9 0 1.7.2 2.4.6L9 4.6a3.4 3.4 0 0 0-2 0L5.6 3.2A5.4 5.4 0 0 1 8 2.6zM3.2 5.6 4.6 7a3.4 3.4 0 0 0 0 2L3.2 10.4a5.4 5.4 0 0 1 0-4.8zM8 13.4c-.9 0-1.7-.2-2.4-.6L7 11.4a3.4 3.4 0 0 0 2 0l1.4 1.4c-.7.4-1.5.6-2.4.6zm4.8-3-1.4-1.4a3.4 3.4 0 0 0 0-2l1.4-1.4a5.4 5.4 0 0 1 0 4.8zM8 6.3a1.7 1.7 0 1 1 0 3.4 1.7 1.7 0 0 1 0-3.4z'/%3E%3C/svg%3E");
   }
+  // KB sections. Same glyph vocabulary the /docs hub uses for these six
+  // (kb-categories.ts: rocket, cpu, layers, boxes, activity, plug-zap), so a
+  // reader meets the same mark for "hardware notes" on either surface.
+  .category-box-kb-getting-started .category-box-heading h3::before {
+    // rocket
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.9 2.1c-2.1-.3-4.4.6-6 2.2l-.9.9-2.3-.4a1 1 0 0 0-.9.3L1.4 7.5c-.3.3-.2.8.2.9l2.4.9 3 3 .9 2.4c.1.4.6.5.9.2l2.4-2.4a1 1 0 0 0 .3-.9l-.4-2.3.9-.9c1.6-1.6 2.5-3.9 2.2-6a.6.6 0 0 0-.3-.3zm-3.4 4.3a1.2 1.2 0 1 1-1.7-1.7 1.2 1.2 0 0 1 1.7 1.7z'/%3E%3C/svg%3E");
+  }
+  .category-box-kb-hardware .category-box-heading h3::before {
+    // cpu
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M5.5 5.5h5v5h-5zM6 1v2H5a2 2 0 0 0-2 2v1H1v1.4h2v1.2H1V10h2v1a2 2 0 0 0 2 2h1v2h1.4v-2h1.2v2H10v-2h1a2 2 0 0 0 2-2v-1h2V9.6h-2V8.4h2V7h-2V6a2 2 0 0 0-2-2h-1V1H9.6v2H8.4V1zm-1.5 4.2c0-.4.3-.7.7-.7h5.6c.4 0 .7.3.7.7v5.6c0 .4-.3.7-.7.7H5.2a.7.7 0 0 1-.7-.7z'/%3E%3C/svg%3E");
+  }
+  .category-box-kb-runtimes .category-box-heading h3::before {
+    // layers
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M8 1 1 4.6l7 3.6 7-3.6zM1.7 7.6 1 8l7 3.6L15 8l-.7-.4L8 10.7zm0 3.4-.7.4L8 15l7-3.6-.7-.4L8 14.1z'/%3E%3C/svg%3E");
+  }
+  .category-box-kb-models .category-box-heading h3::before {
+    // boxes
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M7.3 1 4 2.7v3.1l3.3-1.7zm1.4 0v3.1L12 5.8V2.7zM3.3 7 0 8.7v3.1L3.3 10zm1.4 0v3l3.3 1.7V8.7zm6.6 0-3.3 1.7v3.1L11.3 10zm1.4 0v3l3.3 1.7V8.7z'/%3E%3C/svg%3E");
+  }
+  .category-box-kb-operating .category-box-heading h3::before {
+    // activity
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6.2 1.4 3.9 8.6 2.8 6.3H0v1.6h1.8l2 4.1 2.5-7.6 2.3 8.3 2.2-5.1h3.2V5.9h-4.2l-1.1 2.6z'/%3E%3C/svg%3E");
+  }
+  .category-box-kb-tools .category-box-heading h3::before {
+    // plug-zap
+    mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M6.6.8 3.2 5.4h2.6L4.4 9.9 8.9 4.6H6.3zM11 5.6 8.6 8.5h1.1v2.1a2.6 2.6 0 0 1-2.1 2.5v2.1h1.6v-1c1.6-.4 2.8-1.8 2.8-3.6V8.5H13V5.6zm-6.6 3v2A3.6 3.6 0 0 0 6 13.9v1.3h1.2v-2.2a2.6 2.6 0 0 1-1.6-2.4V9.9z'/%3E%3C/svg%3E");
+  }
+
   .category-box-docs-reference .category-box-heading h3::before {
     // terminal — the exact contracts
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 2h13a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-13a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1zm2.1 3.2L3 6.1 5 7.9 3 9.7l.6.9 2.9-2.5zM8 10h4.5v-1H8z'/%3E%3C/svg%3E");
   }
 }
+
