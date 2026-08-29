@@ -197,10 +197,27 @@
 
 // Title: 14.5px, tight leading, muted until hovered. Unread topics come
 // forward to full --fg rather than getting a different weight.
+// Titles carry the brand face. The list is the closest thing the forum has
+// to the comp's .dtable, and a mono title is what makes it read as one
+// rather than as a generic feed -- the earlier dtable had this, and it was
+// worth keeping when the cramped metrics around it were not.
 .topic-list-item .link-top-line .title {
+  font-family: var(--hal0-font-mono);
   font-size: 14.5px;
   line-height: 1.35;
+  letter-spacing: var(--hal0-ls-tight);
   color: var(--hal0-fg-muted);
+}
+
+// Excerpt: the same type as a category card's blurb (see .hal0-cat-blurb in
+// _hal0-docs.scss) -- body face, 13px, 1.55, --hal0-fg-dim. Both are "the
+// sentence under the heading", so they should not be two different things;
+// core ships this at 14px/Inter/its own muted colour.
+.topic-list-item .topic-excerpt {
+  font-family: var(--hal0-font-body);
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--hal0-fg-dim);
 }
 .topic-list-item:hover .link-top-line .title {
   color: var(--hal0-accent);
