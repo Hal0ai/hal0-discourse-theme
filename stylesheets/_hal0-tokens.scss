@@ -26,8 +26,13 @@
   --hal0-rad-sm: 4px;
   --hal0-rad-lg: 10px;
   --hal0-rad-pill: 999px;
+  --hal0-rad-xs: 3px;
   --hal0-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --hal0-dur-fast: 0.12s;
+  --hal0-dur: 0.18s;
+  --hal0-dur-slow: 0.22s;
+  --hal0-ok-glow: rgba(111,207,151,0.35);
+  --hal0-warn-glow: rgba(232,185,78,0.35);
   --hal0-shadow-menu: 0 16px 48px -8px rgba(0,0,0,0.7);
   --hal0-shadow-drawer: -24px 0 64px -16px rgba(0,0,0,0.6);
 }
@@ -52,14 +57,20 @@
   --hal0-rad-sm: 4px;
   --hal0-rad-lg: 10px;
   --hal0-rad-pill: 999px;
+  --hal0-rad-xs: 3px;
   --hal0-ease: cubic-bezier(0.22, 1, 0.36, 1);
   --hal0-dur-fast: 0.12s;
+  --hal0-dur: 0.18s;
+  --hal0-dur-slow: 0.22s;
+  --hal0-ok-glow: rgba(111,207,151,0.35);
+  --hal0-warn-glow: rgba(232,185,78,0.35);
   --hal0-shadow-menu: 0 16px 48px -8px rgba(0,0,0,0.7);
   --hal0-shadow-drawer: -24px 0 64px -16px rgba(0,0,0,0.6);
   --hal0-accent: #b87800;
   --hal0-accent-hover: #8a5a00;
   --hal0-accent-muted: #f7d680;
   --hal0-accent-glow: rgba(184, 120, 0, 0.16);
+  --hal0-accent-bg: #fdf3d7;
   --hal0-bg: #fafaf9;
   --hal0-bg-elevated: #ffffff;
   --hal0-bg-2: #f3f2f0;
@@ -93,4 +104,5 @@
   --hal0-dev-npu: #6b3fbf;
   --hal0-fast: #1a7f37;
   --hal0-slow: #cf222e;
+  --hal0-shadow-hover: 0 6px 20px rgba(0,0,0,0.10);
 }

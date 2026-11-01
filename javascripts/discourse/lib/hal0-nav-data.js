@@ -14,8 +14,8 @@ export const HAL0_HEADER_LINKS = [
   },
   {
     "label": "docs",
-    "href": "/docs/",
-    "external": false
+    "href": "https://forum.hal0.dev/c/docs/11",
+    "external": true
   },
   {
     "label": "benchmarks",
@@ -26,6 +26,11 @@ export const HAL0_HEADER_LINKS = [
     "label": "profiles",
     "href": "/profiles",
     "external": false
+  },
+  {
+    "label": "releases",
+    "href": "/releases",
+    "external": false
   }
 ];
 
@@ -35,13 +40,13 @@ export const HAL0_FOOTER_COLUMNS = [
     "links": [
       {
         "label": "docs",
-        "href": "/docs/",
-        "external": false
+        "href": "https://forum.hal0.dev/c/docs/11",
+        "external": true
       },
       {
         "label": "knowledge base",
-        "href": "/docs/#knowledge-base",
-        "external": false
+        "href": "https://forum.hal0.dev/c/kb/12",
+        "external": true
       },
       {
         "label": "blog",
@@ -49,14 +54,9 @@ export const HAL0_FOOTER_COLUMNS = [
         "external": false
       },
       {
-        "label": "changelog",
-        "href": "/changelog",
-        "external": false
-      },
-      {
         "label": "releases",
-        "href": "https://github.com/Hal0ai/hal0/releases",
-        "external": true
+        "href": "/releases",
+        "external": false
       }
     ]
   },
@@ -104,8 +104,8 @@ export const HAL0_FOOTER_COLUMNS = [
         "external": false
       },
       {
-        "label": "roadmap",
-        "href": "/#roadmap",
+        "label": "what's new",
+        "href": "/#releases",
         "external": false
       }
     ]
@@ -128,7 +128,7 @@ export const HAL0_SOCIAL = [
 export const HAL0_FOOTER_BASE = [
   {
     "label": "changelog",
-    "href": "/changelog",
+    "href": "/releases",
     "external": false
   },
   {

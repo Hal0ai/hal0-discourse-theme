@@ -9,7 +9,7 @@ import { HAL0_HEADER_LINKS } from "../../lib/hal0-nav-data";
  * and the panel that carries search, notifications and the user menu. That
  * ordering is exactly the design comp's forum-variant header:
  *
- *   [ wordmark | forum ]  learn  benchmarks  profiles  forum      [ search ⌕  ◎  ● ]
+ *   [ wordmark | forum ]  home  docs  benchmarks  profiles  releases  forum      [ search ⌕  ◎  ● ]
  *
  * An earlier version of this component injected a whole second brand strip
  * into `above-main-container` instead. That outlet renders *below* the
