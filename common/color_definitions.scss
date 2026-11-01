@@ -14,6 +14,7 @@
   --hal0-accent-hover: #{dark-light-choose(#8a5a00, #ffc533)};
   --hal0-accent-muted: #{dark-light-choose(#f7d680, #7a5500)};
   --hal0-accent-glow: #{dark-light-choose(rgba(184, 120, 0, 0.16), rgba(255, 176, 0, 0.18))};
+  --hal0-accent-bg: #{dark-light-choose(#fdf3d7, #2a1d00)};
   --hal0-bg: #{dark-light-choose(#fafaf9, #0a0a0a)};
   --hal0-bg-elevated: #{dark-light-choose(#ffffff, #141414)};
   --hal0-bg-2: #{dark-light-choose(#f3f2f0, #161616)};
@@ -47,4 +48,5 @@
   --hal0-dev-npu: #{dark-light-choose(#6b3fbf, #c896ff)};
   --hal0-fast: #{dark-light-choose(#1a7f37, #3fb950)};
   --hal0-slow: #{dark-light-choose(#cf222e, #f85149)};
+  --hal0-shadow-hover: #{dark-light-choose(0 6px 20px rgba(0,0,0,0.10), 0 6px 20px rgba(0,0,0,0.28))};
 }
