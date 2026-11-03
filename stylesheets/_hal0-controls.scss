@@ -168,14 +168,16 @@
   --d-nav-pill-border-radius: var(--hal0-rad-sm);
   --d-nav-color: var(--hal0-fg-dim);
   --d-nav-bg-color: transparent;
+  // Hover changes the label and nothing else, as on the WebUI's tabs (see
+  // below). No fill: the WebUI's tabs have none.
   --d-nav-color--hover: var(--hal0-fg);
-  --d-nav-bg-color--hover: var(--hal0-bg-2);
-  --d-nav-color--active: #0a0a0a;
-  --d-nav-bg-color--active: var(--hal0-accent);
+  --d-nav-bg-color--hover: transparent;
+  // Core's nav-hover mixin also paints a hovered tab's icon with
+  // --d-nav-color--active, so this has to be the amber the active label
+  // uses. The chip-era #0a0a0a turned hovered icons black.
+  --d-nav-color--active: var(--hal0-accent);
+  --d-nav-bg-color--active: transparent;
   --d-nav-border-color--active: var(--hal0-accent);
-  // The active chip carries the state; core's amber-on-amber underline
-  // underneath it would just thicken the bottom edge.
-  --d-nav-underline-height: 0;
 }
 
 // Type + box for the tabs themselves. Core sizes these off the inherited
@@ -188,6 +190,11 @@
   min-height: 28px;
   padding: 5px 11px;
   border: 0;
+  // Core sets `transition: var(--d-button-transition)` on the tab with a
+  // selector that ties with this one and can land later, so the timing goes
+  // through core's own variable on the element instead of racing it.
+  // Matches the WebUI's `.slot-tab` (hal0 ui/src/dashboard.css).
+  --d-button-transition: color 0.12s ease;
 }
 
 // Core's own `.nav-pills > li > a` scores the same and lands later, so the
@@ -206,15 +213,26 @@
 .list-controls .nav-pills {
   gap: 8px;
 }
-// Active tab: amber label with the header's underline, not a solid chip.
-// The chip read as a block floating in the row -- nothing else on the page
-// is a filled rectangle -- and it did not match the main nav one band above
-// it, which marks its current item with a 2px amber rule. Core already
-// draws an ::after bar for the active tab; it is restyled here rather than
-// hidden and redrawn.
+// Tabs follow the hal0 WebUI's tab bar: `.slot-tab` in hal0
+// ui/src/dashboard.css (the Models, Slots and Benchmarks tabs), which the
+// WebUI's other tab strips repeat.
+//   rest    fg-dim label, no underline
+//   hover   fg label, no underline, no fill
+//   active  amber label, 2px amber rule flush along the tab's bottom edge,
+//           full tab width, no glow
+//   timing  color 0.12s ease
+// Core already draws an ::after bar for the active tab; it is restyled
+// here rather than hidden and redrawn.
 .nav-pills > li > a.active,
 .nav-pills > li > button.active {
   position: relative;
+  background: none;
+  color: var(--hal0-accent);
+}
+// Core's hover rule ties with the one above on specificity, so hovering the
+// active tab could turn its label white. This keeps it amber.
+.nav-pills > li > a.active:hover,
+.nav-pills > li > button.active:hover {
   background: none;
   color: var(--hal0-accent);
 }
@@ -222,20 +240,24 @@
 .nav-pills > li > button.active::after {
   background: var(--hal0-accent);
   height: 2px;
-  left: 11px;
-  right: 11px;
-  bottom: 1px;
-  box-shadow: 0 0 8px var(--hal0-accent-glow);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  box-shadow: none;
 }
-.nav-pills > li > a:hover,
-.nav-pills > li > button:hover {
-  color: var(--hal0-accent);
+// The wrong-colour hover bar. Discourse's modernized foundation styles
+// (`:where(.uc-modernize-foundation-theme) .nav-pills > li > a:hover::after`)
+// draw a ~1.75px bar in --d-nav-color--hover under any hovered tab. The
+// WebUI draws no underline on hover: the rule marks the active tab alone.
+.nav-pills > li > a:not(.active):hover::after,
+.nav-pills > li > button:not(.active):hover::after {
+  content: none;
 }
 
 // The /new page's All | Topics | Replies switch. These are plain buttons,
 // not nav-pills, so they were picking the colour scheme's tertiary straight
 // out of core as a filled amber square. Same treatment as the tabs above:
-// the label carries the state, nothing else.
+// hover brightens the label, the active one is amber.
 .topics-replies-toggle {
   font-family: var(--hal0-font-mono);
   font-size: 12px;
@@ -245,9 +267,13 @@
   border-radius: var(--hal0-rad-sm);
   background: none;
   color: var(--hal0-fg-dim);
+  transition: color 0.12s ease;
 
   &:hover,
-  &:focus,
+  &:focus {
+    background: none;
+    color: var(--hal0-fg);
+  }
   &.active {
     background: none;
     color: var(--hal0-accent);
